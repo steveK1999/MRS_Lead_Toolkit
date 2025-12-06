@@ -682,6 +682,7 @@ async function initializePlanetaryBodies() {
     populateAARPlanetDropdown();
     initializeAARPOISelect(); // Initialize POI dropdown even if empty
     populateExtractedToDropdown(); // Populate "Client Extracted To" dropdown
+    initializeAARLocationTypeSelect(); // Initialize Location Type dropdown
 }
 
 // ============================================================================
@@ -778,6 +779,9 @@ function populateAARPlanetDropdown() {
         const displayText = body.designation ? `${body.name} (${body.designation})` : body.name;
         options += `<div class="custom-select-option cursor-pointer px-3 py-2 text-sm text-gray-300 hover:bg-mrs-button hover:text-white" data-value="${body.name}">${displayText}</div>`;
     });
+
+    // Add "Other" option at the end
+    options += `<div class="custom-select-option cursor-pointer px-3 py-2 text-sm text-gray-300 hover:bg-mrs-button hover:text-white border-t border-gray-600 mt-1 pt-2" data-value="Other">Other (specify below)</div>`;
 
     optionsContainer.innerHTML = options;
 
@@ -1062,6 +1066,93 @@ function initializeExtractedToSelect() {
 }
 
 /**
+ * Initializes the AAR Location Type custom select component
+ * Sets up click handlers, search functionality, and option selection
+ */
+function initializeAARLocationTypeSelect() {
+    const wrapper = document.getElementById("aar-location-type-select");
+    if (!wrapper) return;
+
+    const trigger = wrapper.querySelector(".custom-select-trigger");
+    const dropdown = wrapper.querySelector(".custom-select-dropdown");
+    const searchInput = wrapper.querySelector(".location-type-search-input");
+    const optionsContainer = wrapper.querySelector(".custom-select-options");
+
+    // Remove old listeners by cloning and replacing
+    const newTrigger = trigger.cloneNode(true);
+    const newDropdown = dropdown.cloneNode(true);
+
+    trigger.parentNode.replaceChild(newTrigger, trigger);
+    dropdown.parentNode.replaceChild(newDropdown, dropdown);
+
+    // Get fresh references
+    const newArrow = newTrigger.querySelector(".custom-select-arrow");
+    const newSearchInput = newDropdown.querySelector(".location-type-search-input");
+    const newOptionsContainer = newDropdown.querySelector(".custom-select-options");
+    const valueDisplay = document.getElementById("aar-location-type-value");
+
+    newTrigger.addEventListener("click", e => {
+        e.stopPropagation();
+        const isOpen = !newDropdown.classList.contains("hidden");
+
+        document.querySelectorAll(".custom-select-dropdown").forEach(dd => {
+            if (dd !== newDropdown) dd.classList.add("hidden");
+        });
+
+        newDropdown.classList.toggle("hidden");
+        newTrigger.classList.toggle("ring-1", "ring-primary-500");
+        newArrow.classList.toggle("rotate-180");
+
+        if (!isOpen) {
+            newSearchInput.value = "";
+            newOptionsContainer.querySelectorAll(".custom-select-option").forEach(opt => opt.classList.remove("hidden"));
+            newSearchInput.focus();
+        }
+    });
+
+    newSearchInput.addEventListener("input", e => {
+        const searchTerm = e.target.value.toLowerCase();
+        newOptionsContainer.querySelectorAll(".custom-select-option").forEach(option => {
+            const text = option.textContent.toLowerCase();
+            option.classList.toggle("hidden", !text.includes(searchTerm));
+        });
+    });
+
+    newSearchInput.addEventListener("click", e => e.stopPropagation());
+
+    newOptionsContainer.addEventListener("click", e => {
+        const option = e.target.closest(".custom-select-option");
+        if (!option) return;
+
+        const value = option.dataset.value;
+        valueDisplay.textContent = value;
+
+        // Show/hide "Other" free-form input
+        const locationTypeOther = document.getElementById("aar-location-type-other");
+        if (locationTypeOther) {
+            if (value === "Other") {
+                locationTypeOther.classList.remove("hidden");
+            } else {
+                locationTypeOther.classList.add("hidden");
+                locationTypeOther.value = "";
+            }
+        }
+
+        newDropdown.classList.add("hidden");
+        newTrigger.classList.remove("ring-1", "ring-primary-500");
+        newArrow.classList.remove("rotate-180");
+    });
+
+    document.addEventListener("click", e => {
+        if (!wrapper.contains(e.target)) {
+            newDropdown.classList.add("hidden");
+            newTrigger.classList.remove("ring-1", "ring-primary-500");
+            newArrow.classList.remove("rotate-180");
+        }
+    });
+}
+
+/**
  * Initializes the AAR planet custom select component
  * Sets up click handlers, search functionality, and option selection
  * Also triggers POI dropdown population when a planet is selected
@@ -1124,8 +1215,21 @@ function initializeAARPlanetSelect() {
         const value = option.dataset.value;
         valueDisplay.textContent = value;
 
-        // Populate POI dropdown for selected planet
-        populateAARPOIDropdown(value);
+        // Show/hide "Other" free-form input
+        const planetOther = document.getElementById("aar-planet-other");
+        if (planetOther) {
+            if (value === "Other") {
+                planetOther.classList.remove("hidden");
+            } else {
+                planetOther.classList.add("hidden");
+                planetOther.value = "";
+            }
+        }
+
+        // Populate POI dropdown for selected planet (skip if "Other")
+        if (value !== "Other") {
+            populateAARPOIDropdown(value);
+        }
 
         // Reset POI selection
         document.getElementById("aar-poi-value").textContent = "Select POI...";
@@ -1264,22 +1368,26 @@ function generateAARPreview() {
 
     // Location
     aar += "LOCATION\n\n";
-    const planet = document.getElementById("aar-planet-value").textContent;
-    let locationType = document.getElementById("aar-location-type").value;
+    let planet = document.getElementById("aar-planet-value").textContent;
+    const planetOther = document.getElementById("aar-planet-other").value;
+    let locationType = document.getElementById("aar-location-type-value").textContent;
     const locationTypeOther = document.getElementById("aar-location-type-other").value;
     let poi = document.getElementById("aar-poi-value").textContent;
     const poiOther = document.getElementById("aar-poi-other").value;
 
     // Use custom input if "Other" is selected
-    if (locationType === "Other" && locationTypeOther) {
+    if (planet === "Other" && planetOther) {
+        planet = planetOther;
+    }
+    if ((locationType === "Other" || locationType === "Other (specify below)") && locationTypeOther) {
         locationType = locationTypeOther;
     }
-    if (poi === "Other" && poiOther) {
+    if ((poi === "Other" || poi === "Other (specify below)") && poiOther) {
         poi = poiOther;
     }
 
     aar += `Planetary Body: ${planet !== "Select planetary body..." ? planet : ""}\n`;
-    aar += `Location Type: ${locationType}\n`;
+    aar += `Location Type: ${locationType !== "Select type..." ? locationType : ""}\n`;
     aar += `Specific POI: ${poi !== "Select POI..." ? poi : ""}\n\n`;
 
     // Timestamps
@@ -1424,12 +1532,13 @@ function clearAAR() {
     document.getElementById("aar-planet-value").textContent = "Select planetary body...";
     document.getElementById("aar-poi-value").textContent = "Select POI...";
     document.getElementById("aar-extracted-value").textContent = "Select...";
+    document.getElementById("aar-location-type-value").textContent = "Select type...";
 
     // Reset all inputs
     document.getElementById("aar-cap-ships").value = "";
     document.getElementById("aar-additional-ships").value = "";
     document.getElementById("aar-reason").value = "";
-    document.getElementById("aar-location-type").value = "";
+    document.getElementById("aar-planet-other").value = "";
     document.getElementById("aar-location-type-other").value = "";
     document.getElementById("aar-poi-other").value = "";
     document.getElementById("aar-extracted-other").value = "";
@@ -1450,6 +1559,7 @@ function clearAAR() {
     document.getElementById("aar-notes").value = "";
 
     // Hide all "Other" free-form inputs
+    document.getElementById("aar-planet-other").classList.add("hidden");
     document.getElementById("aar-location-type-other").classList.add("hidden");
     document.getElementById("aar-poi-other").classList.add("hidden");
     document.getElementById("aar-extracted-other").classList.add("hidden");
