@@ -918,8 +918,10 @@ function importFromDiscord() {
 
         showImportStatus("success", `Successfully imported ${parsedShips.length} ship(s) with ${parsedShips.reduce((sum, s) => sum + s.crew.length, 0)} crew member(s)!`);
 
-        // Clear the import textarea
-        document.getElementById("import-discord-message").value = "";
+        // Close modal after a brief delay to show success message
+        setTimeout(() => {
+            closeImportModal();
+        }, 1500);
     } catch (error) {
         console.error("Import error:", error);
         showImportStatus("error", "Failed to parse message: " + error.message);
@@ -1078,6 +1080,49 @@ function showImportStatus(type, message) {
     setTimeout(() => {
         statusEl.classList.add("hidden");
     }, 5000);
+}
+
+// ============================================================================
+// IMPORT MODAL FUNCTIONS
+// ============================================================================
+
+/**
+ * Opens the Import from Discord modal.
+ * Displays the modal overlay with flex centering.
+ *
+ * @function openImportModal
+ */
+function openImportModal() {
+    const modal = document.getElementById("import-modal");
+    if (modal) {
+        modal.classList.remove("hidden");
+        modal.classList.add("flex");
+        // Focus the textarea
+        const textarea = document.getElementById("import-discord-message");
+        if (textarea) {
+            textarea.focus();
+        }
+    }
+}
+
+/**
+ * Closes the Import from Discord modal.
+ * Hides the modal and clears any status messages.
+ *
+ * @function closeImportModal
+ */
+function closeImportModal() {
+    const modal = document.getElementById("import-modal");
+    if (modal) {
+        modal.classList.add("hidden");
+        modal.classList.remove("flex");
+        // Clear the textarea and status
+        document.getElementById("import-discord-message").value = "";
+        const statusEl = document.getElementById("import-status");
+        if (statusEl) {
+            statusEl.classList.add("hidden");
+        }
+    }
 }
 
 // ============================================================================

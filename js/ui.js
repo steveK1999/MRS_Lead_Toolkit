@@ -60,11 +60,12 @@ function switchTab(tabName) {
     // If switching to AAR tab, populate ship dropdowns and re-initialize location dropdowns
     if (tabName === "aar") {
         populateAARShipDropdowns();
-        // Re-initialize planet and POI dropdowns to ensure event listeners are attached
+        // Re-initialize dropdowns to ensure event listeners are attached
         if (PLANETARY_BODIES.length > 0) {
             initializeAARPlanetSelect();
         }
         initializeAARPOISelect();
+        initializeAARLocationTypeSelect();
     }
 }
 
