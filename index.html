@@ -61,10 +61,21 @@
                     >
                         🚨 Alarm
                     </button>
-                    <div class="rounded-lg border border-gray-600 bg-gray-700 px-6 py-3">
-                        <span class="text-sm font-medium text-gray-300">Position:</span>
-                        <span id="current-position-display" class="ml-2 text-2xl font-bold text-white">1</span>
-                    </div>
+                    <button 
+                        onclick="copyCurrentPositionStatus()"
+                        class="flex items-center gap-2 rounded-lg border border-gray-600 bg-gray-700 px-4 py-3 text-left text-white transition hover:bg-gray-600"
+                    >
+                        <span class="inline-flex items-center justify-center rounded-full bg-gray-800 p-1" title="Copy status">
+                            <svg class="h-4 w-4 text-gray-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                            </svg>
+                        </span>
+                        <div class="flex flex-col leading-tight">
+                            <span class="text-xs font-medium text-gray-300">Position</span>
+                            <span id="current-position-display" class="text-2xl font-bold">1</span>
+                        </div>
+                    </button>
                 </div>
             </div>
         </div>
