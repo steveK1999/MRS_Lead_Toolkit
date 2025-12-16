@@ -93,6 +93,11 @@ function handleClientReacted() {
     showWorkflowStep(targetStep);
 }
 
+// Expose helper functions to global scope for inline handlers
+window.showNoResponseStep = showNoResponseStep;
+window.handleClientReacted = handleClientReacted;
+window.handleStandDownAction = handleStandDownAction;
+
 /**
  * Minimize the workflow modal
  */
