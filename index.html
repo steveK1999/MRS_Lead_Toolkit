@@ -42,10 +42,25 @@
     <!-- Header Bar -->
     <div class="w-full bg-mrs-box border-b border-gray-700 p-4 shadow-lg">
         <div class="mx-auto max-w-7xl">
-            <h1 class="flex items-center gap-4 text-left font-mohave text-2xl font-semibold uppercase tracking-wide text-white">
-                <img src="https://staff.medrunner.space/images/medrunner-logo-stable-white.svg" alt="Medrunner Logo" class="h-12 w-auto">
-                <span>Medrunner Operations Tool</span>
-            </h1>
+            <div class="flex items-center justify-between">
+                <h1 class="flex items-center gap-4 text-left font-mohave text-2xl font-semibold uppercase tracking-wide text-white">
+                    <img src="https://staff.medrunner.space/images/medrunner-logo-stable-white.svg" alt="Medrunner Logo" class="h-12 w-auto">
+                    <span>Medrunner Operations Tool</span>
+                </h1>
+                <div class="flex items-center gap-4">
+                    <button 
+                        id="alarm-button-header"
+                        onclick="triggerAlarm()"
+                        class="rounded-lg border-2 border-red-600 bg-red-600 px-6 py-3 text-lg font-bold uppercase text-white shadow-lg transition hover:bg-red-700 hover:border-red-700 active:bg-red-800"
+                    >
+                        🚨 Alarm
+                    </button>
+                    <div class="rounded-lg border border-gray-600 bg-gray-700 px-6 py-3">
+                        <span class="text-sm font-medium text-gray-300">Position:</span>
+                        <span id="current-position-display" class="ml-2 text-2xl font-bold text-white">1</span>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -74,16 +89,8 @@
 
         <!-- HOME TAB -->
         <div id="content-home" class="tab-content">
-            <div class="rounded-lg border border-gray-700 bg-mrs-box p-5 shadow-lg md:p-6">
-                <!-- Current Position Display (Top Right) -->
-                <div class="mb-6 flex justify-end">
-                    <div class="rounded-lg border border-gray-600 bg-gray-700 px-6 py-3">
-                        <span class="text-sm font-medium text-gray-300">Current Position:</span>
-                        <span id="current-position-display" class="ml-2 text-2xl font-bold text-white">1</span>
-                    </div>
-                </div>
-
-                <h2 class="mb-6 font-mohave text-2xl font-semibold uppercase tracking-wide text-white">Team Lead Setup</h2>
+            <div class="mx-auto max-w-2xl rounded-lg border border-gray-700 bg-mrs-box p-5 shadow-lg md:p-6">
+                <h2 class="mb-6 text-center font-mohave text-2xl font-semibold uppercase tracking-wide text-white">Team Lead Setup</h2>
                 
                 <!-- Name of the Lead -->
                 <div class="mb-6">
@@ -134,22 +141,24 @@
                     </select>
                 </div>
 
-                <!-- Alarm Button -->
+                <!-- Save Button -->
                 <div class="mt-8">
                     <button 
-                        id="alarm-button"
-                        onclick="triggerAlarm()"
-                        class="w-full rounded-lg border-2 border-red-600 bg-red-600 px-8 py-6 text-2xl font-bold uppercase text-white shadow-lg transition hover:bg-red-700 hover:border-red-700 active:bg-red-800"
+                        onclick="saveHomeData()"
+                        class="w-full rounded-lg border border-green-600 bg-green-600 px-8 py-4 text-lg font-bold uppercase text-white shadow-lg transition hover:bg-green-700 hover:border-green-700 active:bg-green-800"
                     >
-                        🚨 Alarm
+                        💾 Save
                     </button>
+                    <div id="save-success-message" class="mt-3 hidden rounded-lg bg-green-600 px-4 py-3 text-center font-medium text-white">
+                        ✅ Saved successfully!
+                    </div>
                 </div>
             </div>
         </div>
         <!-- END HOME TAB -->
 
-        <!-- Alert Timer (visible across all tabs) -->
-        <div class="mb-6 rounded-lg border border-gray-700 bg-mrs-box p-4 shadow-lg">
+        <!-- Alert Timer (hidden on Home tab) -->
+        <div id="alert-timer-section" class="mb-6 rounded-lg border border-gray-700 bg-mrs-box p-4 shadow-lg hidden">
             <div class="flex flex-col items-center gap-4 md:flex-row md:justify-between">
                 <div class="flex items-center gap-4">
                     <div class="text-center">

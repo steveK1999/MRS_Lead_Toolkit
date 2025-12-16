@@ -27,8 +27,8 @@ function initializeHome() {
     // Load saved values from session storage
     loadHomeData();
 
-    // Set up event listeners
-    setupHomeEventListeners();
+    // Set up event listeners for auto-save (removed to require explicit save)
+    // Event listeners now only update UI, not storage
 
     console.log("Home module - Ready!");
 }
@@ -96,6 +96,36 @@ function setupHomeEventListeners() {
 }
 
 /**
+ * Save home data to session storage
+ * Shows confirmation message
+ */
+function saveHomeData() {
+    // Get values from inputs
+    const leadName = document.getElementById('lead-name').value;
+    const teamPosition = document.getElementById('team-position').value;
+    const numberOfTeams = document.getElementById('number-of-teams').value;
+
+    // Save to session storage
+    sessionStorage.setItem(SESSION_KEYS.LEAD_NAME, leadName);
+    sessionStorage.setItem(SESSION_KEYS.TEAM_POSITION, teamPosition);
+    sessionStorage.setItem(SESSION_KEYS.NUMBER_OF_TEAMS, numberOfTeams);
+
+    // Update position display
+    updatePositionDisplay(teamPosition);
+
+    // Show success message
+    const successMessage = document.getElementById('save-success-message');
+    if (successMessage) {
+        successMessage.classList.remove('hidden');
+        setTimeout(() => {
+            successMessage.classList.add('hidden');
+        }, 3000);
+    }
+
+    console.log('Home data saved:', { leadName, teamPosition, numberOfTeams });
+}
+
+/**
  * Update the position display in the top right
  * @param {number|string} position - The current position to display
  */
@@ -145,8 +175,8 @@ function triggerAlarm() {
     // Update the display
     updatePositionDisplay(currentPosition);
 
-    // Visual feedback - flash the alarm button
-    const alarmButton = document.getElementById('alarm-button');
+    // Visual feedback - flash the alarm button in header
+    const alarmButton = document.getElementById('alarm-button-header');
     if (alarmButton) {
         alarmButton.classList.add('animate-pulse');
         setTimeout(() => {
