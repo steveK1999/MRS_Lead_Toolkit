@@ -1,0 +1,124 @@
+/**
+ * Workflow Module
+ *
+ * Handles the alert workflow modal including:
+ * - Modal display
+ * - Step navigation
+ * - Text copying to clipboard
+ * - Copy notifications
+ *
+ * @module workflow
+ */
+
+/**
+ * Open the workflow modal
+ */
+function openWorkflowModal() {
+    const modal = document.getElementById('workflow-modal');
+    if (modal) {
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+        // Reset to step 1
+        showWorkflowStep(1);
+    }
+}
+
+/**
+ * Close the workflow modal
+ */
+function closeWorkflowModal() {
+    const modal = document.getElementById('workflow-modal');
+    if (modal) {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+    }
+}
+
+/**
+ * Show a specific workflow step
+ * @param {number} stepNumber - The step number to show (1, 2, 3, etc.)
+ */
+function showWorkflowStep(stepNumber) {
+    // Hide all steps
+    document.querySelectorAll('.workflow-step').forEach(step => {
+        step.classList.add('hidden');
+    });
+    
+    // Show the requested step
+    const step = document.getElementById(`workflow-step-${stepNumber}`);
+    if (step) {
+        step.classList.remove('hidden');
+    }
+}
+
+/**
+ * Copy workflow text to clipboard
+ * @param {string} action - The action identifier
+ */
+function copyWorkflowText(action) {
+    let textToCopy = '';
+    
+    switch (action) {
+        case 'no-questionform':
+            textToCopy = 'Hello! Once the questions have been answered we can proceed.';
+            break;
+            
+        case 'without-dispatch':
+            const leadName = getLeadName() || 'Zeek';
+            textToCopy = `Thank you for choosing Medrunner Services! My name is ${leadName}, and I'll be leading the team dispatched to your location. I will be sending you a friend request and/or party invite. (To accept the invite, make sure you're in first-person view and spam the key to the right of P — typically the [ key, though it may vary depending on your keyboard layout.) Please confirm here when you are ready to receive the invites!`;
+            break;
+            
+        case 'client-no-react':
+            textToCopy = 'Please let me know when you are ready to receive the invites!';
+            break;
+            
+        case 'client-yes-react':
+            textToCopy = 'Great! Sending invites now...';
+            break;
+            
+        default:
+            console.warn('Unknown workflow action:', action);
+            return;
+    }
+    
+    // Copy to clipboard
+    navigator.clipboard.writeText(textToCopy).then(() => {
+        console.log('Workflow text copied:', action);
+        showCopyNotification('Copied to clipboard!');
+    }).catch(err => {
+        console.error('Failed to copy workflow text:', err);
+        showCopyNotification('Failed to copy!', true);
+    });
+}
+
+/**
+ * Show copy notification
+ * @param {string} message - The message to display
+ * @param {boolean} isError - Whether this is an error notification
+ */
+function showCopyNotification(message, isError = false) {
+    const notification = document.getElementById('copy-notification');
+    const notificationText = document.getElementById('copy-notification-text');
+    
+    if (!notification || !notificationText) return;
+    
+    // Set message
+    notificationText.textContent = message;
+    
+    // Set color
+    if (isError) {
+        notification.classList.remove('bg-green-600');
+        notification.classList.add('bg-red-600');
+    } else {
+        notification.classList.remove('bg-red-600');
+        notification.classList.add('bg-green-600');
+    }
+    
+    // Show notification
+    notification.classList.remove('hidden');
+    
+    // Hide after 5 seconds
+    setTimeout(() => {
+        notification.classList.add('hidden');
+    }, 5000);
+}

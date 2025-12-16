@@ -807,6 +807,95 @@
         </div>
     </div>
 
+    <!-- Workflow Modal -->
+    <div id="workflow-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/70 p-4">
+        <div class="w-full max-w-2xl rounded-lg border border-gray-700 bg-mrs-box p-6 shadow-xl">
+            <div class="mb-4 flex items-center justify-between">
+                <h2 class="font-mohave text-2xl font-semibold uppercase tracking-wide text-white">Alert Workflow</h2>
+                <button onclick="closeWorkflowModal()" class="rounded-lg p-2 text-gray-400 transition hover:bg-gray-700 hover:text-white">
+                    <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+
+            <!-- Step 1: Initial Options -->
+            <div id="workflow-step-1" class="workflow-step">
+                <p class="mb-4 text-center text-sm font-medium text-red-400">!!!Set Channel Status (Paste)!!!</p>
+                
+                <div class="space-y-3">
+                    <button 
+                        onclick="copyWorkflowText('no-questionform')"
+                        class="w-full rounded-lg border border-blue-600 bg-blue-600 px-6 py-4 text-lg font-bold text-white shadow-lg transition hover:bg-blue-700 hover:border-blue-700"
+                    >
+                        No Questionform
+                    </button>
+                    
+                    <button 
+                        onclick="copyWorkflowText('without-dispatch'); showWorkflowStep(2);"
+                        class="w-full rounded-lg border border-green-600 bg-green-600 px-6 py-4 text-lg font-bold text-white shadow-lg transition hover:bg-green-700 hover:border-green-700"
+                    >
+                        Without Dispatch
+                    </button>
+                </div>
+            </div>
+
+            <!-- Step 2: Did Client React -->
+            <div id="workflow-step-2" class="workflow-step hidden">
+                <p class="mb-4 text-center text-lg font-medium text-white">Did the Client react?</p>
+                
+                <div class="space-y-3">
+                    <button 
+                        onclick="copyWorkflowText('client-no-react')"
+                        class="w-full rounded-lg border border-red-600 bg-red-600 px-6 py-4 text-lg font-bold text-white shadow-lg transition hover:bg-red-700 hover:border-red-700"
+                    >
+                        No
+                    </button>
+                    
+                    <button 
+                        onclick="copyWorkflowText('client-yes-react'); showWorkflowStep(3);"
+                        class="w-full rounded-lg border border-green-600 bg-green-600 px-6 py-4 text-lg font-bold text-white shadow-lg transition hover:bg-green-700 hover:border-green-700"
+                    >
+                        Yes
+                    </button>
+                    
+                    <button 
+                        onclick="showWorkflowStep(1)"
+                        class="w-full rounded-lg border border-gray-600 bg-gray-700 px-4 py-2 text-sm font-medium text-white transition hover:bg-gray-600"
+                    >
+                        ← Back
+                    </button>
+                </div>
+            </div>
+
+            <!-- Step 3: Placeholder for next steps -->
+            <div id="workflow-step-3" class="workflow-step hidden">
+                <p class="mb-4 text-center text-lg font-medium text-white">Next Step</p>
+                
+                <div class="space-y-3">
+                    <p class="text-center text-gray-300">Client reacted - continue workflow...</p>
+                    
+                    <button 
+                        onclick="showWorkflowStep(2)"
+                        class="w-full rounded-lg border border-gray-600 bg-gray-700 px-4 py-2 text-sm font-medium text-white transition hover:bg-gray-600"
+                    >
+                        ← Back
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Copy Notification (Bottom Right) -->
+    <div id="copy-notification" class="fixed bottom-4 right-4 z-50 hidden rounded-lg bg-green-600 px-6 py-3 text-white shadow-lg">
+        <div class="flex items-center gap-2">
+            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+            </svg>
+            <span id="copy-notification-text">Copied to clipboard!</span>
+        </div>
+    </div>
+
     <!-- Application JavaScript Modules -->
     <script src="js/constants.js"></script>
     <script src="js/ships-api.js"></script>
@@ -815,6 +904,7 @@
     <script src="js/tip-splitter.js"></script>
     <script src="js/home.js"></script>
     <script src="js/team-management.js"></script>
+    <script src="js/workflow.js"></script>
     <script src="js/ui.js"></script>
     <script src="js/main.js"></script>
 </body>
