@@ -10,27 +10,47 @@
  * @module workflow
  */
 
+const WORKFLOW_DEFAULT_STEP = 1;
+const workflowState = {
+    currentStep: WORKFLOW_DEFAULT_STEP,
+    minimized: false
+};
+
 /**
  * Open the workflow modal
  */
-function openWorkflowModal() {
+function openWorkflowModal(options = {}) {
     const modal = document.getElementById('workflow-modal');
-    if (modal) {
-        modal.classList.remove('hidden');
-        modal.classList.add('flex');
-        // Reset to step 1
-        showWorkflowStep(1);
-    }
+    if (!modal) return;
+
+    const { resetStep = true } = options;
+
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+
+    workflowState.minimized = false;
+    hideWorkflowMinimizedBar();
+
+    const targetStep = resetStep ? WORKFLOW_DEFAULT_STEP : (workflowState.currentStep || WORKFLOW_DEFAULT_STEP);
+    showWorkflowStep(targetStep);
 }
 
 /**
  * Close the workflow modal
  */
-function closeWorkflowModal() {
+function closeWorkflowModal({ resetState = true } = {}) {
     const modal = document.getElementById('workflow-modal');
     if (modal) {
         modal.classList.add('hidden');
         modal.classList.remove('flex');
+    }
+
+    hideWorkflowMinimizedBar();
+
+    if (resetState) {
+        workflowState.currentStep = WORKFLOW_DEFAULT_STEP;
+        workflowState.minimized = false;
+        updateWorkflowMinimizedStepLabel(workflowState.currentStep);
     }
 }
 
@@ -48,6 +68,58 @@ function showWorkflowStep(stepNumber) {
     const step = document.getElementById(`workflow-step-${stepNumber}`);
     if (step) {
         step.classList.remove('hidden');
+        workflowState.currentStep = stepNumber;
+        updateWorkflowMinimizedStepLabel(stepNumber);
+    }
+}
+
+/**
+ * Minimize the workflow modal
+ */
+function minimizeWorkflowModal() {
+    const modal = document.getElementById('workflow-modal');
+    const minimized = document.getElementById('workflow-minimized');
+    if (!modal || !minimized) return;
+
+    workflowState.minimized = true;
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
+
+    minimized.classList.remove('hidden');
+    minimized.classList.add('flex');
+}
+
+/**
+ * Restore the workflow modal from minimized state
+ */
+function restoreWorkflowModal() {
+    const minimized = document.getElementById('workflow-minimized');
+    if (minimized) {
+        minimized.classList.add('hidden');
+        minimized.classList.remove('flex');
+    }
+
+    openWorkflowModal({ resetStep: false });
+}
+
+/**
+ * Hide the minimized bar if present
+ */
+function hideWorkflowMinimizedBar() {
+    const minimized = document.getElementById('workflow-minimized');
+    if (minimized) {
+        minimized.classList.add('hidden');
+        minimized.classList.remove('flex');
+    }
+}
+
+/**
+ * Update minimized bar label with current step
+ */
+function updateWorkflowMinimizedStepLabel(stepNumber) {
+    const stepLabel = document.getElementById('workflow-minimized-step');
+    if (stepLabel) {
+        stepLabel.textContent = `Aktueller Schritt: ${stepNumber}`;
     }
 }
 
@@ -79,6 +151,22 @@ function copyWorkflowText(action) {
             
         case 'client-yes-react':
             textToCopy = 'Great! Sending invites now...';
+            break;
+
+        case 'chat-warning':
+            textToCopy = "Just as fair warning, if we haven't heard from you within the next 5 minutes, we will hope all is well and close this alert.";
+            break;
+
+        case 'chat-stand-down':
+            textToCopy = "Standing down due to no contact. You're welcome to resubmit, but please know that you will need to be ready to accept friend and party invites and answer the questions in order for us to respond.";
+            break;
+
+        case 'check-key-binding':
+            textToCopy = 'Hmm it was not accepted, is your default accept key the Left Bracket [ ?';
+            break;
+
+        case 'bugged-friend-request':
+            textToCopy = 'The Friend Request has bugged, this is a known problem. Please can you navigate to https://robertsspaceindustries.com/spectrum to accept the Friend Request.\n\nPlease confirm here once you have accepted it.';
             break;
             
         default:
