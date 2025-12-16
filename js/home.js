@@ -19,6 +19,27 @@ const SESSION_KEYS = {
 };
 
 /**
+ * Ensure the lead name input has a value before proceeding with critical actions.
+ * @returns {boolean} True when the lead name is present, false otherwise.
+ */
+function ensureLeadNameProvided() {
+    const leadNameInput = document.getElementById('lead-name');
+    if (!leadNameInput) {
+        console.warn('Lead name input element not found.');
+        return true;
+    }
+
+    const leadName = leadNameInput.value.trim();
+    if (leadName) {
+        return true;
+    }
+
+    showLeadNameWarningModal();
+    leadNameInput.focus();
+    return false;
+}
+
+/**
  * Initialize the Home module
  * Sets up event listeners and loads saved data from session storage
  */
@@ -101,8 +122,13 @@ function setupHomeEventListeners() {
  * Shows confirmation message
  */
 function saveHomeData() {
+    if (!ensureLeadNameProvided()) {
+        return;
+    }
+
     // Get values from inputs
-    const leadName = document.getElementById('lead-name').value;
+    const leadNameInput = document.getElementById('lead-name');
+    const leadName = leadNameInput ? leadNameInput.value.trim() : '';
     const teamPosition = parseInt(document.getElementById('team-position').value);
     const numberOfTeams = parseInt(document.getElementById('number-of-teams').value);
 
@@ -155,6 +181,10 @@ function updatePositionDisplay(position) {
  * - If there's only 1 team, always stay at position 1
  */
 function triggerAlarm() {
+    if (!ensureLeadNameProvided()) {
+        return;
+    }
+
     // Get current values
     let currentPosition = parseInt(localStorage.getItem(SESSION_KEYS.TEAM_POSITION) || '1');
     const numberOfTeams = parseInt(localStorage.getItem(SESSION_KEYS.NUMBER_OF_TEAMS) || '1');
@@ -222,7 +252,7 @@ function triggerAlarm() {
  * @returns {string} The current lead name
  */
 function getLeadName() {
-    return localStorage.getItem(SESSION_KEYS.LEAD_NAME) || '';
+    return (localStorage.getItem(SESSION_KEYS.LEAD_NAME) || '').trim();
 }
 
 /**
@@ -260,6 +290,30 @@ function updateAlertTimerVisibility() {
         } else {
             alertTimerSection.classList.add('hidden');
         }
+    }
+}
+
+/**
+ * Display the lead name warning modal.
+ */
+function showLeadNameWarningModal() {
+    const modal = document.getElementById('lead-name-warning-modal');
+    if (modal) {
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+    } else {
+        alert('Bitte trage den Namen des Leads ein, bevor du fortfährst.');
+    }
+}
+
+/**
+ * Hide the lead name warning modal.
+ */
+function hideLeadNameWarningModal() {
+    const modal = document.getElementById('lead-name-warning-modal');
+    if (modal) {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
     }
 }
 

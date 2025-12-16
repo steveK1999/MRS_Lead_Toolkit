@@ -119,8 +119,21 @@ function hideWorkflowMinimizedBar() {
 function updateWorkflowMinimizedStepLabel(stepNumber) {
     const stepLabel = document.getElementById('workflow-minimized-step');
     if (stepLabel) {
-        stepLabel.textContent = `Aktueller Schritt: ${stepNumber}`;
+        stepLabel.textContent = `Current step: ${stepNumber}`;
     }
+}
+
+/**
+ * Handle stand down action: copy message, reset timer, and close workflow.
+ */
+function handleStandDownAction() {
+    copyWorkflowText('chat-stand-down');
+
+    if (typeof resetAlertTimer === 'function') {
+        resetAlertTimer(true);
+    }
+
+    closeWorkflowModal();
 }
 
 /**
