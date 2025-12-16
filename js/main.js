@@ -12,6 +12,9 @@ document.addEventListener("DOMContentLoaded", () => {
     // Initialize Home module
     initializeHome();
 
+    // Initialize Team Management module
+    initializeTeamManagement();
+
     // Initialize Ships API - fetch ship list from API
     initializeShips();
 

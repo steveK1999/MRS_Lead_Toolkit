@@ -49,6 +49,12 @@
                 </h1>
                 <div class="flex items-center gap-4">
                     <button 
+                        onclick="openStandByModal()"
+                        class="rounded-lg border-2 border-[#5f9ea0] bg-[#5f9ea0] px-6 py-3 text-base font-bold text-white shadow-lg transition hover:bg-[#4f8e90] hover:border-[#4f8e90] active:bg-[#3f7e80] leading-tight"
+                    >
+                        Medrunner in<br>Stand By
+                    </button>
+                    <button 
                         id="alarm-button-header"
                         onclick="triggerAlarm()"
                         class="rounded-lg border-2 border-red-600 bg-red-600 px-6 py-3 text-lg font-bold uppercase text-white shadow-lg transition hover:bg-red-700 hover:border-red-700 active:bg-red-800"
@@ -151,6 +157,14 @@
                     </button>
                     <div id="save-success-message" class="mt-3 hidden rounded-lg bg-green-600 px-4 py-3 text-center font-medium text-white">
                         ✅ Saved successfully!
+                    </div>
+                </div>
+
+                <!-- Team Members List -->
+                <div id="home-team-list" class="mt-8">
+                    <h3 class="mb-4 font-mohave text-xl font-semibold uppercase tracking-wide text-white">Current Team</h3>
+                    <div id="home-team-members" class="space-y-2">
+                        <p class="text-sm text-gray-400 italic">No team members added yet.</p>
                     </div>
                 </div>
             </div>
@@ -703,6 +717,96 @@
         </div>
     </div>
 
+    <!-- Medrunner Stand By Modal -->
+    <div id="standby-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/70 p-4">
+        <div class="w-full max-w-3xl max-h-[90vh] overflow-y-auto rounded-lg border border-gray-700 bg-mrs-box p-6 shadow-xl">
+            <div class="mb-4 flex items-center justify-between">
+                <h2 class="font-mohave text-2xl font-semibold uppercase tracking-wide text-white">Medrunner Stand By</h2>
+                <button onclick="closeStandByModal()" class="rounded-lg p-2 text-gray-400 transition hover:bg-gray-700 hover:text-white">
+                    <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+
+            <!-- Checklist (for single team) -->
+            <div id="standby-checklist-single" class="mb-6">
+                <h3 class="mb-3 font-mohave text-lg font-semibold uppercase tracking-wide text-blue-300">Checklist</h3>
+                <ul class="space-y-2 text-gray-300">
+                    <li class="flex items-start gap-2">
+                        <span class="text-blue-400">•</span>
+                        <span>Less than 9 People in the current Team</span>
+                    </li>
+                    <li class="flex items-start gap-2">
+                        <span class="text-blue-400">•</span>
+                        <span>At the designated muster point.</span>
+                    </li>
+                    <li class="flex items-start gap-2">
+                        <span class="text-blue-400">•</span>
+                        <span>Necessary gear for duty.</span>
+                    </li>
+                    <li class="flex items-start gap-2">
+                        <span class="text-blue-400">•</span>
+                        <span>Respawn point is set to the current muster point?</span>
+                    </li>
+                    <li class="flex items-start gap-2">
+                        <span class="text-blue-400">•</span>
+                        <span>"Can you load into the game and confirm you're having no issues?"</span>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- Add Medrunner Form -->
+            <div class="mb-6 rounded-lg border border-gray-600 bg-gray-800/50 p-4">
+                <h3 class="mb-3 font-mohave text-lg font-semibold uppercase tracking-wide text-white">Add Team Member</h3>
+                <div class="mb-3">
+                    <label for="medrunner-name-input" class="mb-2 block text-sm font-medium text-gray-300">Medrunner Name</label>
+                    <input 
+                        type="text" 
+                        id="medrunner-name-input" 
+                        placeholder="Enter medrunner name..."
+                        class="w-full rounded-lg border border-gray-600 bg-gray-700 px-4 py-3 text-gray-200 transition focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
+                    >
+                </div>
+                <div id="team-warning" class="mb-3 hidden rounded-lg bg-amber-600/90 px-4 py-3 text-center font-medium text-white">
+                    ⚠️ Caution: You should split the team!
+                </div>
+                <button 
+                    onclick="addTeamMember()"
+                    class="w-full rounded-lg border border-green-600 bg-green-600 px-6 py-3 text-base font-bold text-white shadow-lg transition hover:bg-green-700 hover:border-green-700 active:bg-green-800"
+                >
+                    💾 Add to Team
+                </button>
+            </div>
+
+            <!-- Current Team Members List -->
+            <div class="mb-4">
+                <div class="mb-3 flex items-center justify-between">
+                    <h3 class="font-mohave text-lg font-semibold uppercase tracking-wide text-white">Current Team Members</h3>
+                    <button 
+                        onclick="sortTeamMembers()"
+                        class="rounded-lg border border-gray-600 bg-gray-700 px-4 py-2 text-sm font-medium text-white transition hover:bg-gray-600"
+                    >
+                        🔄 Reload/Sort
+                    </button>
+                </div>
+                <div id="team-members-list" class="space-y-2">
+                    <p class="text-sm text-gray-400 italic">No team members added yet.</p>
+                </div>
+            </div>
+
+            <!-- Close Button -->
+            <div class="mt-6">
+                <button 
+                    onclick="closeStandByModal()"
+                    class="w-full rounded-lg border border-gray-600 bg-gray-700 px-6 py-3 text-base font-medium text-white transition hover:bg-gray-600"
+                >
+                    Close
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- Application JavaScript Modules -->
     <script src="js/constants.js"></script>
     <script src="js/ships-api.js"></script>
@@ -710,6 +814,7 @@
     <script src="js/aar.js"></script>
     <script src="js/tip-splitter.js"></script>
     <script src="js/home.js"></script>
+    <script src="js/team-management.js"></script>
     <script src="js/ui.js"></script>
     <script src="js/main.js"></script>
 </body>
