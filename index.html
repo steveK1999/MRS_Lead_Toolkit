@@ -53,7 +53,10 @@
     <div class="w-full bg-mrs-box border-b border-gray-700">
         <div class="mx-auto max-w-7xl px-4">
             <div class="flex gap-2">
-                <button onclick="switchTab('shipAssignment')" id="tab-shipAssignment" class="tab-button active border-b-2 border-mrs-button px-6 py-3 font-mohave text-sm font-semibold uppercase tracking-wide text-white transition hover:bg-gray-700">
+                <button onclick="switchTab('home')" id="tab-home" class="tab-button active border-b-2 border-mrs-button px-6 py-3 font-mohave text-sm font-semibold uppercase tracking-wide text-white transition hover:bg-gray-700">
+                    Home
+                </button>
+                <button onclick="switchTab('shipAssignment')" id="tab-shipAssignment" class="tab-button border-b-2 border-transparent px-6 py-3 font-mohave text-sm font-semibold uppercase tracking-wide text-gray-400 transition hover:bg-gray-700 hover:text-white">
                     Ship Assignment
                 </button>
                 <button onclick="switchTab('aar')" id="tab-aar" class="tab-button border-b-2 border-transparent px-6 py-3 font-mohave text-sm font-semibold uppercase tracking-wide text-gray-400 transition hover:bg-gray-700 hover:text-white">
@@ -68,6 +71,82 @@
 
     <!-- Main Content -->
     <div class="mx-auto max-w-7xl p-4 md:p-8">
+
+        <!-- HOME TAB -->
+        <div id="content-home" class="tab-content">
+            <div class="rounded-lg border border-gray-700 bg-mrs-box p-5 shadow-lg md:p-6">
+                <!-- Current Position Display (Top Right) -->
+                <div class="mb-6 flex justify-end">
+                    <div class="rounded-lg border border-gray-600 bg-gray-700 px-6 py-3">
+                        <span class="text-sm font-medium text-gray-300">Current Position:</span>
+                        <span id="current-position-display" class="ml-2 text-2xl font-bold text-white">1</span>
+                    </div>
+                </div>
+
+                <h2 class="mb-6 font-mohave text-2xl font-semibold uppercase tracking-wide text-white">Team Lead Setup</h2>
+                
+                <!-- Name of the Lead -->
+                <div class="mb-6">
+                    <label for="lead-name" class="mb-2 block text-sm font-medium text-gray-300">Name of the Lead</label>
+                    <input 
+                        type="text" 
+                        id="lead-name" 
+                        placeholder="Enter lead name..."
+                        class="w-full rounded-lg border border-gray-600 bg-gray-700 px-4 py-3 text-gray-200 transition focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
+                    >
+                </div>
+
+                <!-- Current Position of the Team -->
+                <div class="mb-6">
+                    <label for="team-position" class="mb-2 block text-sm font-medium text-gray-300">Current Position of the Team</label>
+                    <select 
+                        id="team-position"
+                        class="w-full rounded-lg border border-gray-600 bg-gray-700 px-4 py-3 text-gray-200 transition focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
+                    >
+                        <option value="1">1</option>
+                        <option value="2">2</option>
+                        <option value="3">3</option>
+                        <option value="4">4</option>
+                        <option value="5">5</option>
+                        <option value="6">6</option>
+                        <option value="7">7</option>
+                        <option value="8">8</option>
+                        <option value="9">9</option>
+                    </select>
+                </div>
+
+                <!-- Number of Teams in System -->
+                <div class="mb-6">
+                    <label for="number-of-teams" class="mb-2 block text-sm font-medium text-gray-300">Number of Teams of your System</label>
+                    <select 
+                        id="number-of-teams"
+                        class="w-full rounded-lg border border-gray-600 bg-gray-700 px-4 py-3 text-gray-200 transition focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
+                    >
+                        <option value="1">1</option>
+                        <option value="2">2</option>
+                        <option value="3">3</option>
+                        <option value="4">4</option>
+                        <option value="5">5</option>
+                        <option value="6">6</option>
+                        <option value="7">7</option>
+                        <option value="8">8</option>
+                        <option value="9">9</option>
+                    </select>
+                </div>
+
+                <!-- Alarm Button -->
+                <div class="mt-8">
+                    <button 
+                        id="alarm-button"
+                        onclick="triggerAlarm()"
+                        class="w-full rounded-lg border-2 border-red-600 bg-red-600 px-8 py-6 text-2xl font-bold uppercase text-white shadow-lg transition hover:bg-red-700 hover:border-red-700 active:bg-red-800"
+                    >
+                        🚨 Alarm
+                    </button>
+                </div>
+            </div>
+        </div>
+        <!-- END HOME TAB -->
 
         <!-- Alert Timer (visible across all tabs) -->
         <div class="mb-6 rounded-lg border border-gray-700 bg-mrs-box p-4 shadow-lg">
@@ -96,7 +175,7 @@
         </div>
 
         <!-- SHIP ASSIGNMENT TAB -->
-        <div id="content-shipAssignment" class="tab-content">
+        <div id="content-shipAssignment" class="tab-content hidden">
 
         <!-- Import Success Banner (hidden by default) -->
         <div id="import-success-banner" class="mb-4 hidden rounded-lg bg-green-600 px-4 py-3 text-center font-medium text-white shadow-lg">
@@ -621,6 +700,7 @@
     <script src="js/ship-assignment.js"></script>
     <script src="js/aar.js"></script>
     <script src="js/tip-splitter.js"></script>
+    <script src="js/home.js"></script>
     <script src="js/ui.js"></script>
     <script src="js/main.js"></script>
 </body>
