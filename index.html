@@ -698,10 +698,10 @@
     <div id="lead-name-warning-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/70 p-4">
         <div class="w-full max-w-sm rounded-lg border border-amber-500 bg-mrs-box p-6 shadow-xl">
             <div class="flex flex-col items-center gap-4 text-center">
-                <div class="text-lg font-semibold uppercase tracking-wide text-white">Lead Name benötigt</div>
-                <p class="text-sm text-gray-300">Bitte trage den Namen des Leads ein, bevor du speicherst oder den Alarm auslöst.</p>
+                <div class="text-lg font-semibold uppercase tracking-wide text-white">Lead Name Required</div>
+                <p class="text-sm text-gray-300">Please enter the lead name before saving or triggering the alert.</p>
                 <button onclick="hideLeadNameWarningModal()" class="rounded-lg border border-amber-500 bg-amber-500 px-5 py-2 text-sm font-semibold uppercase text-white transition hover:bg-amber-600">
-                    Verstanden
+                    Got it
                 </button>
             </div>
         </div>
@@ -889,7 +889,7 @@
                 
                 <div class="space-y-3">
                     <button 
-                        onclick="copyWorkflowText('client-no-react'); showWorkflowStep(4);"
+                        onclick="copyWorkflowText('client-no-react'); showNoResponseStep();"
                         class="w-full rounded-lg border border-red-600 bg-red-600 px-6 py-4 text-lg font-bold text-white shadow-lg transition hover:bg-red-700 hover:border-red-700"
                     >
                         Chat - NO
@@ -931,7 +931,7 @@
                     </button>
 
                     <button 
-                        onclick="showWorkflowStep(5)"
+                        onclick="handleClientReacted()"
                         class="w-full rounded-lg border border-green-600 bg-green-600 px-6 py-4 text-lg font-bold text-white shadow-lg transition hover:bg-green-700 hover:border-green-700"
                     >
                         Client reacted
@@ -952,7 +952,7 @@
                 
                 <div class="space-y-3">
                     <button 
-                        onclick="showWorkflowStep(8)"
+                        onclick="showWorkflowStep(9)"
                         class="w-full rounded-lg border border-green-600 bg-green-600 px-6 py-4 text-lg font-bold text-white shadow-lg transition hover:bg-green-700 hover:border-green-700"
                     >
                         Invites worked
@@ -967,6 +967,34 @@
                     
                     <button 
                         onclick="showWorkflowStep(3)"
+                        class="w-full rounded-lg border border-gray-600 bg-gray-700 px-4 py-2 text-sm font-medium text-white transition hover:bg-gray-600"
+                    >
+                        ← Back
+                    </button>
+                </div>
+            </div>
+
+            <!-- Step 9: Send Friend Request -->
+            <div id="workflow-step-9" class="workflow-step hidden">
+                <p class="mb-4 text-center text-lg font-medium text-white">Send Friend Request</p>
+
+                <div class="space-y-3">
+                    <button 
+                        onclick="copyWorkflowText('chat-sending-request'); showWorkflowStep(10);"
+                        class="w-full rounded-lg border border-blue-500 bg-blue-500 px-6 py-4 text-lg font-bold text-white shadow-lg transition hover:bg-blue-600 hover:border-blue-600"
+                    >
+                        Chat - Sending Request
+                    </button>
+
+                    <button 
+                        onclick="showNoResponseStep(true)"
+                        class="w-full rounded-lg border border-amber-500 bg-amber-500 px-6 py-4 text-lg font-bold text-white shadow-lg transition hover:bg-amber-600 hover:border-amber-600"
+                    >
+                        No response from client
+                    </button>
+
+                    <button 
+                        onclick="showWorkflowStep(5)"
                         class="w-full rounded-lg border border-gray-600 bg-gray-700 px-4 py-2 text-sm font-medium text-white transition hover:bg-gray-600"
                     >
                         ← Back
@@ -1002,9 +1030,9 @@
                 <div class="space-y-3">
                     <button 
                         onclick="showWorkflowStep(5)"
-                        class="w-full rounded-lg border border-gray-600 bg-gray-700 px-6 py-4 text-lg font-bold text-white shadow-lg transition hover:bg-gray-600"
+                        class="w-full rounded-lg border border-green-600 bg-green-600 px-6 py-4 text-lg font-bold text-white shadow-lg transition hover:bg-green-700 hover:border-green-700"
                     >
-                        Continue
+                        No
                     </button>
                     
                     <button 
@@ -1012,6 +1040,34 @@
                         class="w-full rounded-lg border border-red-600 bg-red-600 px-6 py-4 text-lg font-bold text-white shadow-lg transition hover:bg-red-700 hover:border-red-700"
                     >
                         Chat - Bugged
+                    </button>
+                </div>
+            </div>
+
+            <!-- Step 10: Party Invite -->
+            <div id="workflow-step-10" class="workflow-step hidden">
+                <p class="mb-4 text-center text-lg font-medium text-white">Party Invite</p>
+
+                <div class="space-y-3">
+                    <button 
+                        onclick="showWorkflowStep(8)"
+                        class="w-full rounded-lg border border-green-600 bg-green-600 px-6 py-4 text-lg font-bold text-white shadow-lg transition hover:bg-green-700 hover:border-green-700"
+                    >
+                        Invites confirmed
+                    </button>
+
+                    <button 
+                        onclick="showWorkflowStep(6)"
+                        class="w-full rounded-lg border border-amber-600 bg-amber-600 px-6 py-4 text-lg font-bold text-white shadow-lg transition hover:bg-amber-700 hover:border-amber-700"
+                    >
+                        Trouble with invites
+                    </button>
+
+                    <button 
+                        onclick="showWorkflowStep(9)"
+                        class="w-full rounded-lg border border-gray-600 bg-gray-700 px-4 py-2 text-sm font-medium text-white transition hover:bg-gray-600"
+                    >
+                        ← Back
                     </button>
                 </div>
             </div>

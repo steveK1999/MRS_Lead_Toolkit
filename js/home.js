@@ -302,7 +302,7 @@ function showLeadNameWarningModal() {
         modal.classList.remove('hidden');
         modal.classList.add('flex');
     } else {
-        alert('Bitte trage den Namen des Leads ein, bevor du fortfährst.');
+        alert('Please enter the lead name before continuing.');
     }
 }
 

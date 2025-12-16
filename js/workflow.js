@@ -13,7 +13,8 @@
 const WORKFLOW_DEFAULT_STEP = 1;
 const workflowState = {
     currentStep: WORKFLOW_DEFAULT_STEP,
-    minimized: false
+    minimized: false,
+    clientReactedTarget: 5
 };
 
 /**
@@ -29,6 +30,7 @@ function openWorkflowModal(options = {}) {
     modal.classList.add('flex');
 
     workflowState.minimized = false;
+    workflowState.clientReactedTarget = 5;
     hideWorkflowMinimizedBar();
 
     const targetStep = resetStep ? WORKFLOW_DEFAULT_STEP : (workflowState.currentStep || WORKFLOW_DEFAULT_STEP);
@@ -50,6 +52,7 @@ function closeWorkflowModal({ resetState = true } = {}) {
     if (resetState) {
         workflowState.currentStep = WORKFLOW_DEFAULT_STEP;
         workflowState.minimized = false;
+        workflowState.clientReactedTarget = 5;
         updateWorkflowMinimizedStepLabel(workflowState.currentStep);
     }
 }
@@ -71,6 +74,23 @@ function showWorkflowStep(stepNumber) {
         workflowState.currentStep = stepNumber;
         updateWorkflowMinimizedStepLabel(stepNumber);
     }
+}
+
+/**
+ * Show the no response step and adjust client reacted target as needed.
+ * @param {boolean} fromSendFriendRequest - Whether navigation came from the send friend request flow.
+ */
+function showNoResponseStep(fromSendFriendRequest = false) {
+    workflowState.clientReactedTarget = fromSendFriendRequest ? 10 : 5;
+    showWorkflowStep(4);
+}
+
+/**
+ * Navigate when client reacted.
+ */
+function handleClientReacted() {
+    const targetStep = workflowState.clientReactedTarget || 5;
+    showWorkflowStep(targetStep);
 }
 
 /**
@@ -180,6 +200,10 @@ function copyWorkflowText(action) {
 
         case 'bugged-friend-request':
             textToCopy = 'The Friend Request has bugged, this is a known problem. Please can you navigate to https://robertsspaceindustries.com/spectrum to accept the Friend Request.\n\nPlease confirm here once you have accepted it.';
+            break;
+
+        case 'chat-sending-request':
+            textToCopy = 'Friend Request sent, please spam the accept key!';
             break;
             
         default:
