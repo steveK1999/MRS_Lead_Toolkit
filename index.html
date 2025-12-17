@@ -1,922 +1,698 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ship Assignment Tool</title>
-    <link rel="icon" type="image/png" href="favicon.png">
-    <!-- Load Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    
-    <!-- Load Google Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Mohave:wght@400;500;600;700&display=swap" rel="stylesheet">
-    
-    <!-- Configure Tailwind to use custom fonts and colors -->
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    fontFamily: {
-                        'sans': ['Inter', 'sans-serif'],
-                        'mohave': ['Mohave', 'sans-serif'],
-                    },
-                    colors: {
-                        // Custom colors from user request
-                        'mrs-bg': '#1f2937',
-                        'mrs-box': '#1d2735',
-                        'mrs-button': '#2b4e71',
-                        'mrs-button-hover': '#254666', // A slightly darker hover
-                        primary: tailwind.colors.blue,
-                    }
-                }
-            }
-        }
-    </script>
-
-    <link rel="stylesheet" href="css/styles.css">
-</head>
-<body class="min-h-screen bg-mrs-bg p-0 font-sans text-gray-200">
-    
-    <!-- Header Bar -->
-    <div class="w-full bg-mrs-box border-b border-gray-700 p-4 shadow-lg">
-        <div class="mx-auto max-w-7xl">
-            <div class="flex items-center justify-between">
-                <h1 class="flex items-center gap-4 text-left font-mohave text-2xl font-semibold uppercase tracking-wide text-white">
-                    <img src="https://staff.medrunner.space/images/medrunner-logo-stable-white.svg" alt="Medrunner Logo" class="h-12 w-auto">
-                    <span>Medrunner Operations Tool</span>
-                </h1>
-                <div class="flex items-center gap-4">
-                    <button 
-                        onclick="openStandByModal()"
-                        class="rounded-lg border-2 border-[#5f9ea0] bg-[#5f9ea0] px-6 py-3 text-base font-bold text-white shadow-lg transition hover:bg-[#4f8e90] hover:border-[#4f8e90] active:bg-[#3f7e80] leading-tight"
-                    >
-                        Medrunner in<br>Stand By
-                    </button>
-                    <button 
-                        id="alarm-button-header"
-                        onclick="triggerAlarm()"
-                        class="rounded-lg border-2 border-red-600 bg-red-600 px-6 py-3 text-lg font-bold uppercase text-white shadow-lg transition hover:bg-red-700 hover:border-red-700 active:bg-red-800"
-                    >
-                        🚨 Alarm
-                    </button>
-                    <button 
-                        onclick="copyCurrentPositionStatus()"
-                        class="flex items-center gap-2 rounded-lg border border-gray-600 bg-gray-700 px-4 py-3 text-left text-white transition hover:bg-gray-600"
-                    >
-                        <span class="inline-flex items-center justify-center rounded-full bg-gray-800 p-1" title="Copy status">
-                            <svg class="h-4 w-4 text-gray-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-                                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
-                            </svg>
-                        </span>
-                        <div class="flex flex-col items-center leading-tight text-center">
-                            <span class="text-xs font-medium text-gray-300">Position</span>
-                            <span id="current-position-display" class="text-2xl font-bold">1</span>
-                        </div>
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Tab Navigation -->
-    <div class="w-full bg-mrs-box border-b border-gray-700">
-        <div class="mx-auto max-w-7xl px-4">
-            <div class="flex gap-2">
-                <button onclick="switchTab('home')" id="tab-home" class="tab-button active border-b-2 border-mrs-button px-6 py-3 font-mohave text-sm font-semibold uppercase tracking-wide text-white transition hover:bg-gray-700">
-                    Home
-                </button>
-                <button onclick="switchTab('shipAssignment')" id="tab-shipAssignment" class="tab-button border-b-2 border-transparent px-6 py-3 font-mohave text-sm font-semibold uppercase tracking-wide text-gray-400 transition hover:bg-gray-700 hover:text-white">
-                    Ship Assignment
-                </button>
-                <button onclick="switchTab('aar')" id="tab-aar" class="tab-button border-b-2 border-transparent px-6 py-3 font-mohave text-sm font-semibold uppercase tracking-wide text-gray-400 transition hover:bg-gray-700 hover:text-white">
-                    After Action Report
-                </button>
-                <button onclick="switchTab('tipSplitter')" id="tab-tipSplitter" class="tab-button border-b-2 border-transparent px-6 py-3 font-mohave text-sm font-semibold uppercase tracking-wide text-gray-400 transition hover:bg-gray-700 hover:text-white">
-                    Tip Splitter
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Main Content -->
-    <div class="mx-auto max-w-7xl p-4 md:p-8">
-
-        <!-- Alert Timer (global) -->
-        <div id="alert-timer-section" class="mb-6 rounded-lg border border-gray-700 bg-mrs-box p-4 shadow-lg hidden">
-            <div class="flex flex-col items-center gap-4 md:flex-row md:justify-between">
-                <div class="flex items-center gap-4">
-                    <div class="text-center">
-                        <div id="alert-timer-display" class="font-mono text-3xl font-bold text-white md:text-4xl">00:00:00</div>
-                        <div id="alert-timer-stage" class="text-sm font-medium text-gray-400">Ready</div>
-                        <div id="alert-channel-status" class="mt-1 text-xs text-gray-500">Channel status: Standby</div>
-                    </div>
-                </div>
-                <div class="flex flex-col items-center gap-2 md:flex-row md:gap-3">
-                    <!-- Channel Status Reminder -->
-                    <div id="timer-reminder" class="hidden rounded-lg bg-amber-600/90 px-3 py-2 text-sm font-medium text-white animate-pulse">
-                        <span id="timer-reminder-text">Remember to update channel status!</span>
-                    </div>
-                    <div class="flex items-center gap-3">
-                        <button id="alert-timer-button" onclick="advanceAlertTimer()" class="rounded-lg bg-green-600 px-6 py-3 text-base font-bold text-white transition hover:bg-green-700 border border-green-500 md:px-8 md:py-4 md:text-lg">
-                            Start Alert Timer
-                        </button>
-                        <button onclick="confirmResetAlertTimer()" class="rounded-lg bg-gray-700 px-4 py-3 text-sm font-medium text-gray-300 transition hover:bg-gray-600 border border-gray-600 md:py-4" title="Reset Timer">
-                            Reset
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- HOME TAB -->
-        <div id="content-home" class="tab-content">
-            <div class="mx-auto max-w-2xl rounded-lg border border-gray-700 bg-mrs-box p-5 shadow-lg md:p-6">
-                <h2 class="mb-6 text-center font-mohave text-2xl font-semibold uppercase tracking-wide text-white">Team Lead Setup</h2>
-                
-                <!-- Name of the Lead -->
-                <div class="mb-6">
-                    <div id="workflow-content" class="space-y-6">
-                        <div id="workflow-state-header" class="space-y-2">
-                            <h3 id="workflow-state-title" class="hidden text-center text-lg font-semibold uppercase tracking-wide text-white"></h3>
-                            <p id="workflow-state-text" class="hidden text-sm text-gray-300 text-center"></p>
-                        </div>
-                        <div id="workflow-input-container" class="hidden space-y-3"></div>
-                        <div id="workflow-transition-buttons" class="flex flex-col gap-3"></div>
-                    </div>
-                                        <div class="custom-select-option cursor-pointer px-3 py-2 text-sm text-gray-300 hover:bg-mrs-button hover:text-white border-t border-gray-600 mt-1 pt-2" data-value="Other">Other (specify below)</div>
-                                    </div>
-
-            <!-- Workflow Confirmation Modal -->
-            <div id="workflow-confirm-modal" class="fixed inset-0 z-[60] hidden items-center justify-center bg-black/70 p-4">
-                <div class="w-full max-w-md rounded-lg border border-gray-700 bg-mrs-box p-6 text-gray-200 shadow-xl">
-                    <p id="workflow-confirm-message" class="mb-6 text-center text-sm text-gray-200"></p>
-                    <div class="flex flex-col gap-3 sm:flex-row sm:justify-center">
-                        <button id="workflow-confirm-accept" class="rounded-lg border border-green-600 bg-green-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-green-700">
-                            Confirm
-                        </button>
-                        <button id="workflow-confirm-cancel" class="rounded-lg border border-gray-600 bg-gray-700 px-4 py-2 text-sm font-semibold text-gray-200 transition hover:bg-gray-600">
-                            Cancel
-                        </button>
-                    </div>
-                </div>
-            </div>
-                                </div>
-                            </div>
-                            <input type="text" id="aar-location-type-other" placeholder="Specify location type..." class="mt-2 w-full rounded-lg border border-gray-600 bg-gray-700 px-3 py-2 text-sm text-gray-200 transition focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 hidden">
-                        </div>
-
-                        <!-- Specific POI -->
-                        <div class="md:col-span-2">
-                            <label class="mb-2 block text-sm font-medium text-gray-300">Specific POI</label>
-                            <div class="custom-select-wrapper relative" id="aar-poi-select">
-                                <div class="custom-select-trigger relative flex w-full cursor-pointer items-center justify-between rounded-md border border-gray-600 bg-gray-700 px-3 py-2 text-sm text-gray-200 transition hover:border-primary-500">
-                                    <span class="custom-select-value truncate pr-4" id="aar-poi-value">Select POI...</span>
-                                    <svg class="custom-select-arrow absolute right-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400 transition-transform duration-200" viewBox="0 0 20 20" fill="currentColor">
-                                        <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/>
-                                    </svg>
-                                </div>
-                                <div class="custom-select-dropdown absolute left-0 right-0 top-full z-50 mt-1 hidden overflow-hidden rounded-md border border-gray-600 bg-gray-700 shadow-lg">
-                                    <div class="border-b border-gray-600 bg-gray-800 p-2">
-                                        <input type="text" placeholder="Search POIs..." class="poi-search-input w-full rounded-md border border-gray-600 bg-gray-900 px-3 py-1.5 text-sm text-gray-200 focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500">
-                                    </div>
-                                    <div class="custom-select-options custom-scrollbar max-h-60 overflow-y-auto" id="aar-poi-options">
-                                        <div class="px-3 py-2 text-sm text-gray-400">Select a planetary body first</div>
-                                    </div>
-                                </div>
-                            </div>
-                            <input type="text" id="aar-poi-other" placeholder="Specify POI..." class="mt-2 w-full rounded-lg border border-gray-600 bg-gray-700 px-3 py-2 text-sm text-gray-200 transition focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 hidden">
-                        </div>
-                    </div>
-                </div>
-
-                <!-- TIMESTAMPS Section -->
-                <div class="mb-6">
-                    <h3 class="mb-3 font-mohave text-lg font-semibold uppercase tracking-wide text-blue-300">Timestamps (minutes)</h3>
-                    <div class="grid grid-cols-2 gap-4 md:grid-cols-4">
-                        <div>
-                            <label class="mb-2 block text-sm font-medium text-gray-300">Alert</label>
-                            <input type="text" id="aar-alert" value="00" class="w-full rounded-lg border border-gray-600 bg-gray-700 px-3 py-2 text-sm text-gray-200 transition focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500">
-                        </div>
-                        <div>
-                            <label class="mb-2 block text-sm font-medium text-gray-300">Depart</label>
-                            <input type="text" id="aar-depart" placeholder="5" class="w-full rounded-lg border border-gray-600 bg-gray-700 px-3 py-2 text-sm text-gray-200 transition focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500">
-                        </div>
-                        <div>
-                            <label class="mb-2 block text-sm font-medium text-gray-300">Client</label>
-                            <input type="text" id="aar-client" placeholder="15" class="w-full rounded-lg border border-gray-600 bg-gray-700 px-3 py-2 text-sm text-gray-200 transition focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500">
-                        </div>
-                        <div>
-                            <label class="mb-2 block text-sm font-medium text-gray-300">RTB</label>
-                            <input type="text" id="aar-rtb" placeholder="25" class="w-full rounded-lg border border-gray-600 bg-gray-700 px-3 py-2 text-sm text-gray-200 transition focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500">
-                        </div>
-                    </div>
-                </div>
-
-                <!-- ENCOUNTERS Section -->
-                <div class="mb-6">
-                    <h3 class="mb-3 font-mohave text-lg font-semibold uppercase tracking-wide text-blue-300">Encounters</h3>
-                    <div class="grid gap-4 md:grid-cols-2">
-                        <div>
-                            <label class="mb-2 block text-sm font-medium text-gray-300">PVE</label>
-                            <input type="text" id="aar-pve" placeholder="e.g., NPCs (9Tails), Natural (Freezing Planet), None" class="w-full rounded-lg border border-gray-600 bg-gray-700 px-3 py-2 text-sm text-gray-200 transition focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500">
-                        </div>
-                        <div>
-                            <label class="mb-2 block text-sm font-medium text-gray-300">PVP</label>
-                            <input type="text" id="aar-pvp" placeholder="e.g., Hostiles, Neutrals, None" class="w-full rounded-lg border border-gray-600 bg-gray-700 px-3 py-2 text-sm text-gray-200 transition focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500">
-                        </div>
-                    </div>
-                    <div class="mt-4">
-                        <label class="mb-2 block text-sm font-medium text-gray-300">Actions Taken</label>
-                        <textarea id="aar-actions" rows="3" placeholder="Brief description of tactics and actions..." class="w-full rounded-lg border border-gray-600 bg-gray-700 px-3 py-2 text-sm text-gray-200 transition focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"></textarea>
-                    </div>
-                </div>
-
-                <!-- ISSUES Section -->
-                <div class="mb-6">
-                    <h3 class="mb-3 font-mohave text-lg font-semibold uppercase tracking-wide text-blue-300">Issues</h3>
-                    <div class="mb-4">
-                        <label class="mb-2 block text-sm font-medium text-gray-300">Problems</label>
-                        <div class="flex flex-wrap gap-2">
-                            <label class="flex items-center rounded-lg border border-gray-600 bg-gray-700 px-3 py-2 text-sm transition hover:bg-gray-600">
-                                <input type="checkbox" value="Login" class="aar-issue-checkbox mr-2 h-4 w-4 rounded border-gray-600 bg-gray-700 text-mrs-button focus:ring-2 focus:ring-mrs-button">
-                                Login
-                            </label>
-                            <label class="flex items-center rounded-lg border border-gray-600 bg-gray-700 px-3 py-2 text-sm transition hover:bg-gray-600">
-                                <input type="checkbox" value="Undocking" class="aar-issue-checkbox mr-2 h-4 w-4 rounded border-gray-600 bg-gray-700 text-mrs-button focus:ring-2 focus:ring-mrs-button">
-                                Undocking
-                            </label>
-                            <label class="flex items-center rounded-lg border border-gray-600 bg-gray-700 px-3 py-2 text-sm transition hover:bg-gray-600">
-                                <input type="checkbox" value="Quantum Travel/Jumpgate" class="aar-issue-checkbox mr-2 h-4 w-4 rounded border-gray-600 bg-gray-700 text-mrs-button focus:ring-2 focus:ring-mrs-button">
-                                Quantum Travel/Jumpgate
-                            </label>
-                            <label class="flex items-center rounded-lg border border-gray-600 bg-gray-700 px-3 py-2 text-sm transition hover:bg-gray-600">
-                                <input type="checkbox" value="30K" class="aar-issue-checkbox mr-2 h-4 w-4 rounded border-gray-600 bg-gray-700 text-mrs-button focus:ring-2 focus:ring-mrs-button">
-                                30K
-                            </label>
-                            <label class="flex items-center rounded-lg border border-gray-600 bg-gray-700 px-3 py-2 text-sm transition hover:bg-gray-600">
-                                <input type="checkbox" value="Desync" class="aar-issue-checkbox mr-2 h-4 w-4 rounded border-gray-600 bg-gray-700 text-mrs-button focus:ring-2 focus:ring-mrs-button">
-                                Desync
-                            </label>
-                            <label class="flex items-center rounded-lg border border-gray-600 bg-gray-700 px-3 py-2 text-sm transition hover:bg-gray-600">
-                                <input type="checkbox" value="Elevators" class="aar-issue-checkbox mr-2 h-4 w-4 rounded border-gray-600 bg-gray-700 text-mrs-button focus:ring-2 focus:ring-mrs-button">
-                                Elevators
-                            </label>
-                            <input type="text" id="aar-other-issues" placeholder="Other issues..." class="rounded-lg border border-gray-600 bg-gray-700 px-3 py-2 text-sm text-gray-200 transition focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500">
-                        </div>
-                    </div>
-                    <div>
-                        <label class="mb-2 block text-sm font-medium text-gray-300">Brief Fix</label>
-                        <textarea id="aar-fix" rows="2" placeholder="Describe how issues were resolved..." class="w-full rounded-lg border border-gray-600 bg-gray-700 px-3 py-2 text-sm text-gray-200 transition focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"></textarea>
-                    </div>
-                </div>
-
-                <!-- SUMMARY Section -->
-                <div class="mb-6">
-                    <h3 class="mb-3 font-mohave text-lg font-semibold uppercase tracking-wide text-blue-300">Summary</h3>
-                    <textarea id="aar-summary" rows="4" placeholder="Short alert description..." class="w-full rounded-lg border border-gray-600 bg-gray-700 px-3 py-2 text-sm text-gray-200 transition focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"></textarea>
-                </div>
-
-                <!-- RESULT Section -->
-                <div class="mb-6">
-                    <h3 class="mb-3 font-mohave text-lg font-semibold uppercase tracking-wide text-blue-300">Result</h3>
-                    <div class="mb-4">
-                        <label class="mb-2 block text-sm font-medium text-gray-300">Mission Outcome</label>
-                        <select id="aar-outcome" class="w-full rounded-lg border border-gray-600 bg-gray-700 px-3 py-2 text-sm text-gray-200 transition focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500">
-                            <option value="">Select...</option>
-                            <option value="Success">Success</option>
-                            <option value="Failed">Failed</option>
-                            <option value="Aborted">Aborted</option>
-                            <option value="No Contact">No Contact</option>
-                            <option value="Refused">Refused</option>
-                            <option value="Game Error">Game Error</option>
-                            <option value="Canceled">Canceled</option>
-                        </select>
-                    </div>
-                    <div class="grid gap-4 md:grid-cols-2">
-                        <div id="aar-extracted-container" class="hidden">
-                            <label class="mb-2 block text-sm font-medium text-gray-300">Client Extracted To</label>
-                            <div class="custom-select-wrapper relative" id="aar-extracted-select">
-                                <div class="custom-select-trigger relative flex w-full cursor-pointer items-center justify-between rounded-md border border-gray-600 bg-gray-700 px-3 py-2 text-sm text-gray-200 transition hover:border-primary-500">
-                                    <span class="custom-select-value truncate pr-4" id="aar-extracted-value">Select...</span>
-                                    <svg class="custom-select-arrow absolute right-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400 transition-transform duration-200" viewBox="0 0 20 20" fill="currentColor">
-                                        <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/>
-                                    </svg>
-                                </div>
-                                <div class="custom-select-dropdown absolute left-0 right-0 top-full z-50 mt-1 hidden overflow-hidden rounded-md border border-gray-600 bg-gray-700 shadow-lg">
-                                    <div class="border-b border-gray-600 bg-gray-800 p-2">
-                                        <input type="text" placeholder="Search stations..." class="extracted-search-input w-full rounded-md border border-gray-600 bg-gray-900 px-3 py-1.5 text-sm text-gray-200 focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500">
-                                    </div>
-                                    <div class="custom-select-options custom-scrollbar max-h-60 overflow-y-auto" id="aar-extracted-options">
-                                        <!-- Will be populated by JavaScript -->
-                                    </div>
-                                </div>
-                            </div>
-                            <input type="text" id="aar-extracted-other" placeholder="Specify location..." class="mt-2 w-full rounded-lg border border-gray-600 bg-gray-700 px-3 py-2 text-sm text-gray-200 transition focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 hidden">
-                        </div>
-                        <div>
-                            <label class="mb-2 block text-sm font-medium text-gray-300">Challenges</label>
-                            <select id="aar-challenges" class="w-full rounded-lg border border-gray-600 bg-gray-700 px-3 py-2 text-sm text-gray-200 transition focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500">
-                                <option value="">Select...</option>
-                                <option value="Abnormal Events">Abnormal Events (e.g., PvP, Hostage)</option>
-                                <option value="Routine">Routine (e.g., Standard Bunker Rescue)</option>
-                                <option value="Other">Other</option>
-                                <option value="None">None</option>
-                            </select>
-                            <input type="text" id="aar-challenges-other" placeholder="Specify challenges..." class="mt-2 w-full rounded-lg border border-gray-600 bg-gray-700 px-3 py-2 text-sm text-gray-200 transition focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 hidden">
-                        </div>
-                    </div>
-                    <div class="mt-4">
-                        <label class="mb-2 block text-sm font-medium text-gray-300">Failure/Abort Reason (if applicable)</label>
-                        <input type="text" id="aar-failure" placeholder="Describe reason for failure or abort..." class="w-full rounded-lg border border-gray-600 bg-gray-700 px-3 py-2 text-sm text-gray-200 transition focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500">
-                    </div>
-                </div>
-
-                <!-- NOTES Section -->
-                <div class="mb-6">
-                    <h3 class="mb-3 font-mohave text-lg font-semibold uppercase tracking-wide text-blue-300">Notes</h3>
-                    <textarea id="aar-notes" rows="4" placeholder="Any additional notes..." class="w-full rounded-lg border border-gray-600 bg-gray-700 px-3 py-2 text-sm text-gray-200 transition focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"></textarea>
-                </div>
-
-                <!-- Action Buttons -->
-                <div class="flex gap-3">
-                    <button onclick="generateAARPreview()" class="flex-1 rounded-lg border border-mrs-button bg-mrs-button px-6 py-3 font-semibold text-white shadow-md transition hover:border-mrs-button-hover hover:bg-mrs-button-hover">
-                        Generate Preview
-                    </button>
-                    <button onclick="clearAAR()" class="rounded-lg border border-gray-600 bg-gray-700 px-6 py-3 font-semibold text-white transition hover:bg-gray-600">
-                        Clear Form
-                    </button>
-                </div>
-            </div>
-
-            <!-- AAR Preview Card -->
-            <div class="rounded-lg border border-gray-700 bg-mrs-box p-5 shadow-lg md:p-6">
-                <h2 class="mb-4 font-mohave text-2xl font-semibold uppercase tracking-wide text-white">AAR Preview</h2>
-                <div id="aar-preview" class="max-h-96 min-h-[100px] overflow-y-auto rounded-lg border border-gray-700 bg-gray-900 p-4 font-mono text-sm text-gray-300 whitespace-pre-wrap md:p-6">Generate AAR to see preview...</div>
-                <button class="mt-5 w-full rounded-lg border border-mrs-button bg-mrs-button px-8 py-4 text-lg font-semibold text-white shadow-lg transition hover:border-mrs-button-hover hover:bg-mrs-button-hover" onclick="copyAARToClipboard()">COPY AAR TO CLIPBOARD</button>
-                <!-- Success Message -->
-                <div id="aar-successMessage" class="hidden">
-                    <div class="mt-3 rounded-lg bg-green-600 px-4 py-3 text-center font-medium text-white">
-                        ✅ Copied to clipboard!
-                    </div>
-                </div>
-            </div>
-        </div>
-        <!-- END AAR TAB -->
-
-        <!-- TIP SPLITTER TAB -->
-        <div id="content-tipSplitter" class="tab-content hidden">
-            <div class="mb-6 rounded-lg border border-gray-700 bg-mrs-box p-5 shadow-lg md:p-6">
-                <h2 class="mb-4 font-mohave text-2xl font-semibold uppercase tracking-wide text-white">Tip Splitter Calculator</h2>
-                <p class="mb-4 rounded-lg border border-blue-900 bg-blue-950/50 p-3 text-sm text-gray-300">
-                    💡 <strong class="text-white">Calculate tip distributions</strong> accounting for the 0.5% transaction fee on each transfer. The calculator ensures the team lead doesn't lose money by including the fee in each transfer amount.
-                </p>
-
-                <!-- Input Section -->
-                <div class="mb-6">
-                    <h3 class="mb-3 font-mohave text-lg font-semibold uppercase tracking-wide text-blue-300">Tip Details</h3>
-                    <div class="grid gap-4 md:grid-cols-2">
-                        <div>
-                            <label class="mb-2 block text-sm font-medium text-gray-300">Total Tip Amount (aUEC)</label>
-                            <input type="number" id="tip-total" placeholder="100000" min="0" class="w-full rounded-lg border border-gray-600 bg-gray-700 px-3 py-2 text-sm text-gray-200 transition focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500">
-                        </div>
-                        <div>
-                            <label class="mb-2 block text-sm font-medium text-gray-300">
-                                Number of Crew Members
-                                <span class="text-xs font-normal text-gray-400">(excluding Team Lead)</span>
-                            </label>
-                            <input type="number" id="tip-recipients" placeholder="5" min="1" class="w-full rounded-lg border border-gray-600 bg-gray-700 px-3 py-2 text-sm text-gray-200 transition focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500">
-                            <p class="mt-1 text-xs text-gray-400">Enter the number of crew members who should receive tips (don't count yourself as Team Lead)</p>
-                        </div>
-                    </div>
-
-                    <!-- Lead Choice Option -->
-                    <div class="mt-4">
-                        <label class="mb-2 block text-sm font-medium text-gray-300">Your (Team Lead) Choice</label>
-                        <select id="tip-lead-choice" class="w-full rounded-lg border border-gray-600 bg-gray-700 px-3 py-2 text-sm text-gray-200 transition focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500">
-                            <option value="lead-keep">Keep Tip</option>
-                            <option value="lead-decline">Don't Want Tip (Redistribute)</option>
-                            <option value="lead-logistics">Donate to Logistics</option>
-                        </select>
-                        <p class="mt-1 text-xs text-gray-400">Choose what happens to your share. Keep = you get an equal share with no fee. Redistribute = your share goes to crew keeping tips. Logistics = your share goes to logistics pool.</p>
-                    </div>
-
-                    <!-- Option: Import from Ship Assignments -->
-                    <div class="mt-4">
-                        <button onclick="importCrewForTip()" class="rounded-lg border border-gray-600 bg-gray-700 px-4 py-2 text-sm font-medium text-white transition hover:bg-gray-600">
-                            Import Crew Count from Ship Assignments
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Recipient Management -->
-                <div class="mb-6">
-                    <h3 class="mb-3 font-mohave text-lg font-semibold uppercase tracking-wide text-blue-300">Crew Recipients</h3>
-                    <p class="mb-3 text-sm text-gray-400">
-                        Each crew member (excluding Team Lead) gets an equal share. Choose what happens to each share:
-                    </p>
-                    <div id="tip-recipients-list" class="mb-3 flex flex-col gap-2">
-                        <div class="px-3 py-2 text-sm text-gray-400">Add crew members by entering a number above or importing from ship assignments.</div>
-                    </div>
-                </div>
-
-                <!-- Calculate Button -->
-                <div class="mb-6">
-                    <button onclick="calculateTipSplit()" class="w-full rounded-lg border border-mrs-button bg-mrs-button px-8 py-4 text-lg font-semibold text-white shadow-lg transition hover:border-mrs-button-hover hover:bg-mrs-button-hover">
-                        CALCULATE SPLITS
-                    </button>
-                </div>
-
-                <!-- Results Section -->
-                <div id="tip-results" class="hidden">
-                    <h3 class="mb-3 font-mohave text-lg font-semibold uppercase tracking-wide text-blue-300">Transfer Amounts</h3>
-                    <p class="mb-3 text-xs text-gray-400">Type the "Amount to SEND" in-game. They'll receive that exact amount. Star Citizen adds 0.5% fee on top of what you send.</p>
-                    <div class="mb-4 rounded-lg border border-gray-700 bg-gray-900 p-4">
-                        <div class="mb-3 grid grid-cols-3 gap-4 border-b border-gray-700 pb-2 text-sm font-semibold text-blue-300">
-                            <div>Recipient</div>
-                            <div class="text-right">Amount to SEND</div>
-                            <div class="text-right">They RECEIVE</div>
-                        </div>
-                        <div id="tip-results-list" class="flex flex-col gap-2"></div>
-                        <div id="tip-logistics-transfer" class="hidden mt-3 pt-3 border-t border-yellow-600"></div>
-                    </div>
-
-                    <div class="rounded-lg border border-green-900 bg-green-950/50 p-4">
-                        <div class="grid gap-2 text-sm">
-                            <div class="flex justify-between">
-                                <span class="text-gray-300">Total Tip:</span>
-                                <span class="font-semibold text-white" id="tip-summary-total">0 aUEC</span>
-                            </div>
-                            <div class="flex justify-between">
-                                <span class="text-gray-300">Total Crew Members:</span>
-                                <span class="font-semibold text-white" id="tip-summary-crew-count">0</span>
-                            </div>
-                            <div class="flex justify-between">
-                                <span class="text-gray-300">Share Per Crew Member:</span>
-                                <span class="font-semibold text-white" id="tip-summary-share">0 aUEC</span>
-                            </div>
-                            <div class="flex justify-between">
-                                <span class="text-gray-300">Total Fees (0.5% per transfer):</span>
-                                <span class="font-semibold text-red-300" id="tip-summary-fees">0 aUEC</span>
-                            </div>
-                            <div id="tip-summary-logistics-section" class="hidden flex justify-between border-t border-yellow-800 pt-2">
-                                <span class="text-yellow-300">Logistics Pool:</span>
-                                <span class="text-lg font-bold text-yellow-300" id="tip-summary-logistics">0 aUEC</span>
-                            </div>
-                            <div class="flex justify-between border-t border-green-800 pt-2">
-                                <span class="text-gray-300">You Will Transfer:</span>
-                                <span class="text-lg font-bold text-white" id="tip-summary-transfer">0 aUEC</span>
-                            </div>
-                            <div class="flex justify-between">
-                                <span class="text-gray-300">You Keep:</span>
-                                <span class="text-lg font-bold text-green-300" id="tip-summary-keep">0 aUEC</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <!-- END TIP SPLITTER TAB -->
-    </div>
-
-    <!-- Lead Name Warning Modal -->
-    <div id="lead-name-warning-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/70 p-4">
-        <div class="w-full max-w-sm rounded-lg border border-amber-500 bg-mrs-box p-6 shadow-xl">
-            <div class="flex flex-col items-center gap-4 text-center">
-                <div class="text-lg font-semibold uppercase tracking-wide text-white">Lead Name Required</div>
-                <p class="text-sm text-gray-300">Please enter the lead name before saving or triggering the alert.</p>
-                <button onclick="hideLeadNameWarningModal()" class="rounded-lg border border-amber-500 bg-amber-500 px-5 py-2 text-sm font-semibold uppercase text-white transition hover:bg-amber-600">
-                    Got it
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Import from Discord Modal -->
-    <div id="import-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/70 p-4">
-        <div class="w-full max-w-2xl rounded-lg border border-gray-700 bg-mrs-box p-6 shadow-xl">
-            <div class="mb-4 flex items-center justify-between">
-                <h2 class="font-mohave text-2xl font-semibold uppercase tracking-wide text-white">Import from Discord</h2>
-                <button onclick="closeImportModal()" class="rounded-lg p-2 text-gray-400 transition hover:bg-gray-700 hover:text-white">
-                    <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                    </svg>
-                </button>
-            </div>
-            <p class="mb-4 rounded-lg border border-blue-900 bg-blue-950/50 p-3 text-sm text-gray-300">
-                💡 <strong class="text-white">Paste a Discord ship assignment message</strong> below to automatically populate the ship assignments. This is useful for team lead hand-overs.
-            </p>
-            <textarea id="import-discord-message" rows="10" placeholder="Paste your Discord ship assignment message here..." class="w-full rounded-lg border border-gray-600 bg-gray-700 px-3 py-2 text-sm text-gray-200 font-mono transition focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"></textarea>
-            <div id="import-status" class="mt-3 hidden rounded-lg px-4 py-3 text-center font-medium"></div>
-            <div class="mt-4 flex gap-3">
-                <button onclick="importFromDiscord()" class="flex-1 rounded-lg border border-mrs-button bg-mrs-button px-5 py-2.5 text-sm font-medium text-white shadow-md transition hover:border-mrs-button-hover hover:bg-mrs-button-hover">Import & Populate</button>
-                <button onclick="closeImportModal()" class="rounded-lg border border-gray-600 bg-gray-700 px-5 py-2.5 text-sm font-medium text-white transition hover:bg-gray-600">Cancel</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Medrunner Stand By Modal -->
-    <div id="standby-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/70 p-4">
-        <div class="w-full max-w-3xl max-h-[90vh] overflow-y-auto rounded-lg border border-gray-700 bg-mrs-box p-6 shadow-xl">
-            <div class="mb-4 flex items-center justify-between">
-                <h2 class="font-mohave text-2xl font-semibold uppercase tracking-wide text-white">Medrunner Stand By</h2>
-                <button onclick="closeStandByModal()" class="rounded-lg p-2 text-gray-400 transition hover:bg-gray-700 hover:text-white">
-                    <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                    </svg>
-                </button>
-            </div>
-
-            <!-- Checklist (for single team) -->
-            <div id="standby-checklist-single" class="mb-6">
-                <h3 class="mb-3 font-mohave text-lg font-semibold uppercase tracking-wide text-blue-300">Checklist</h3>
-                <ul class="space-y-2 text-gray-300">
-                    <li class="flex items-start gap-2">
-                        <span class="text-blue-400">•</span>
-                        <span>Less than 9 People in the current Team</span>
-                    </li>
-                    <li class="flex items-start gap-2">
-                        <span class="text-blue-400">•</span>
-                        <span>At the designated muster point.</span>
-                    </li>
-                    <li class="flex items-start gap-2">
-                        <span class="text-blue-400">•</span>
-                        <span>Necessary gear for duty.</span>
-                    </li>
-                    <li class="flex items-start gap-2">
-                        <span class="text-blue-400">•</span>
-                        <span>Respawn point is set to the current muster point?</span>
-                    </li>
-                    <li class="flex items-start gap-2">
-                        <span class="text-blue-400">•</span>
-                        <span>"Can you load into the game and confirm you're having no issues?"</span>
-                    </li>
-                </ul>
-            </div>
-
-            <!-- Add Medrunner Form -->
-            <div class="mb-6 rounded-lg border border-gray-600 bg-gray-800/50 p-4">
-                <h3 class="mb-3 font-mohave text-lg font-semibold uppercase tracking-wide text-white">Add Team Member</h3>
-                <div class="mb-3">
-                    <label for="medrunner-name-input" class="mb-2 block text-sm font-medium text-gray-300">Medrunner Name</label>
-                    <input 
-                        type="text" 
-                        id="medrunner-name-input" 
-                        placeholder="Enter medrunner name..."
-                        class="w-full rounded-lg border border-gray-600 bg-gray-700 px-4 py-3 text-gray-200 transition focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
-                    >
-                </div>
-                <div id="team-warning" class="mb-3 hidden rounded-lg bg-amber-600/90 px-4 py-3 text-center font-medium text-white">
-                    ⚠️ Caution: You should split the team!
-                </div>
-                <button 
-                    onclick="addTeamMember()"
-                    class="w-full rounded-lg border border-green-600 bg-green-600 px-6 py-3 text-base font-bold text-white shadow-lg transition hover:bg-green-700 hover:border-green-700 active:bg-green-800"
-                >
-                    💾 Add to Team
-                </button>
-            </div>
-
-            <!-- Current Team Members List -->
-            <div class="mb-4">
-                <div class="mb-3 flex items-center justify-between">
-                    <h3 class="font-mohave text-lg font-semibold uppercase tracking-wide text-white">Current Team Members</h3>
-                    <button 
-                        onclick="sortTeamMembers()"
-                        class="rounded-lg border border-gray-600 bg-gray-700 px-4 py-2 text-sm font-medium text-white transition hover:bg-gray-600"
-                    >
-                        🔄 Reload/Sort
-                    </button>
-                </div>
-                <div id="team-members-list" class="space-y-2">
-                    <p class="text-sm text-gray-400 italic">No team members added yet.</p>
-                </div>
-            </div>
-
-            <!-- Close Button -->
-            <div class="mt-6">
-                <button 
-                    onclick="closeStandByModal()"
-                    class="w-full rounded-lg border border-gray-600 bg-gray-700 px-6 py-3 text-base font-medium text-white transition hover:bg-gray-600"
-                >
-                    Close
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Workflow Modal -->
-    <div id="workflow-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/70 p-4">
-        <div class="w-full max-w-2xl rounded-lg border border-gray-700 bg-mrs-box p-6 shadow-xl">
-            <div class="mb-4 flex items-center justify-between">
-                <div class="flex-1">
-                    <h2 class="font-mohave text-2xl font-semibold uppercase tracking-wide text-white">Alert Workflow</h2>
-                </div>
-                <div class="flex items-center gap-2">
-                    <button onclick="minimizeWorkflowModal()" class="rounded-lg border border-gray-600 px-3 py-2 text-sm font-medium text-gray-300 transition hover:bg-gray-700 hover:text-white">
-                        Minimize
-                    </button>
-                    <button onclick="closeWorkflowModal()" class="rounded-lg p-2 text-gray-400 transition hover:bg-gray-700 hover:text-white" title="Workflow schließen">
-                        <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                        </svg>
-                    </button>
-                </div>
-            </div>
-
-            <!-- Step 1: Set Channel Status -->
-            <div id="workflow-step-1" class="workflow-step">
-                <div class="space-y-3">
-                    <button 
-                        onclick="copyWorkflowText('set-channel-status'); showWorkflowStep(2);"
-                        class="w-full rounded-lg border border-purple-600 bg-purple-600 px-6 py-4 text-lg font-bold text-white shadow-lg transition hover:bg-purple-700 hover:border-purple-700"
-                    >
-                        🔔 Set Channel Status
-                    </button>
-                </div>
-            </div>
-
-            <!-- Step 2: Initial Options -->
-            <div id="workflow-step-2" class="workflow-step hidden">
-                <p class="mb-4 rounded-lg bg-blue-950/50 border border-blue-900 px-4 py-3 text-center text-sm text-gray-300">
-                    <strong class="text-white">If you press a Button some of them copy a message to your Clipboard</strong><br>
-                    <span class="text-xs">Buttons with Channel in their Name are status for the channel</span><br>
-                    <span class="text-xs">Buttons with Chat copy the specified preset for the text with the client</span>
-                </p>
-                
-                <div class="space-y-3">
-                    <button 
-                        onclick="copyWorkflowText('no-questionform')"
-                        class="w-full rounded-lg border border-blue-600 bg-blue-600 px-6 py-4 text-lg font-bold text-white shadow-lg transition hover:bg-blue-700 hover:border-blue-700"
-                    >
-                        💬 Chat - No Questionform
-                    </button>
-                    
-                    <button 
-                        onclick="copyWorkflowText('without-dispatch'); showWorkflowStep(3);"
-                        class="w-full rounded-lg border border-green-600 bg-green-600 px-6 py-4 text-lg font-bold text-white shadow-lg transition hover:bg-green-700 hover:border-green-700"
-                    >
-                        💬 Chat - Without Dispatch
-                    </button>
-                    
-                    <button 
-                        onclick="showWorkflowStep(1)"
-                        class="w-full rounded-lg border border-gray-600 bg-gray-700 px-4 py-2 text-sm font-medium text-white transition hover:bg-gray-600"
-                    >
-                        ← Back
-                    </button>
-                </div>
-            </div>
-
-            <!-- Step 3: Did Client React -->
-            <div id="workflow-step-3" class="workflow-step hidden">
-                <p class="mb-4 text-center text-lg font-medium text-white">Did the Client react?</p>
-                
-                <div class="space-y-3">
-                    <button 
-                        onclick="copyWorkflowText('client-no-react'); showNoResponseStep();"
-                        class="w-full rounded-lg border border-red-600 bg-red-600 px-6 py-4 text-lg font-bold text-white shadow-lg transition hover:bg-red-700 hover:border-red-700"
-                    >
-                        Chat - NO
-                    </button>
-                    
-                    <button 
-                        onclick="copyWorkflowText('client-yes-react'); showWorkflowStep(5);"
-                        class="w-full rounded-lg border border-green-600 bg-green-600 px-6 py-4 text-lg font-bold text-white shadow-lg transition hover:bg-green-700 hover:border-green-700"
-                    >
-                        Chat - YES
-                    </button>
-                    
-                    <button 
-                        onclick="showWorkflowStep(2)"
-                        class="w-full rounded-lg border border-gray-600 bg-gray-700 px-4 py-2 text-sm font-medium text-white transition hover:bg-gray-600"
-                    >
-                        ← Back
-                    </button>
-                </div>
-            </div>
-
-            <!-- Step 4: Follow-up for no reaction -->
-            <div id="workflow-step-4" class="workflow-step hidden">
-                <p class="mb-4 text-center text-lg font-medium text-white">No response from client</p>
-                
-                <div class="space-y-3">
-                    <button 
-                        onclick="copyWorkflowText('chat-warning')"
-                        class="w-full rounded-lg border border-amber-500 bg-amber-500 px-6 py-4 text-lg font-bold text-white shadow-lg transition hover:bg-amber-600 hover:border-amber-600"
-                    >
-                        Chat - Warning
-                    </button>
-                    
-                    <button 
-                        onclick="handleStandDownAction()"
-                        class="w-full rounded-lg border border-red-700 bg-red-700 px-6 py-4 text-lg font-bold text-white shadow-lg transition hover:bg-red-800 hover:border-red-800"
-                    >
-                        Chat - Stand Down
-                    </button>
-
-                    <button 
-                        onclick="handleClientReacted()"
-                        class="w-full rounded-lg border border-green-600 bg-green-600 px-6 py-4 text-lg font-bold text-white shadow-lg transition hover:bg-green-700 hover:border-green-700"
-                    >
-                        Client reacted
-                    </button>
-                    
-                    <button 
-                        onclick="showWorkflowStep(3)"
-                        class="w-full rounded-lg border border-gray-600 bg-gray-700 px-4 py-2 text-sm font-medium text-white transition hover:bg-gray-600"
-                    >
-                        ← Back
-                    </button>
-                </div>
-            </div>
-
-            <!-- Step 5: Invite follow-up -->
-            <div id="workflow-step-5" class="workflow-step hidden">
-                <p class="mb-4 text-center text-lg font-medium text-white">Invite status</p>
-                
-                <div class="space-y-3">
-                    <button 
-                        onclick="showWorkflowStep(9)"
-                        class="w-full rounded-lg border border-green-600 bg-green-600 px-6 py-4 text-lg font-bold text-white shadow-lg transition hover:bg-green-700 hover:border-green-700"
-                    >
-                        Invites worked
-                    </button>
-                    
-                    <button 
-                        onclick="showWorkflowStep(6)"
-                        class="w-full rounded-lg border border-amber-600 bg-amber-600 px-6 py-4 text-lg font-bold text-white shadow-lg transition hover:bg-amber-700 hover:border-amber-700"
-                    >
-                        Trouble with Invites
-                    </button>
-                    
-                    <button 
-                        onclick="showWorkflowStep(3)"
-                        class="w-full rounded-lg border border-gray-600 bg-gray-700 px-4 py-2 text-sm font-medium text-white transition hover:bg-gray-600"
-                    >
-                        ← Back
-                    </button>
-                </div>
-            </div>
-
-        <!-- Step 9: Send Friend Request -->
-        <div id="workflow-step-9" class="workflow-step hidden">
-            <p class="mb-4 text-center text-lg font-medium text-white">Send Friend Request</p>
-
-            <div class="space-y-3">
-                <button 
-                    onclick="copyWorkflowText('chat-sending-request'); showWorkflowStep(10);"
-                    class="w-full rounded-lg border border-blue-500 bg-blue-500 px-6 py-4 text-lg font-bold text-white shadow-lg transition hover:bg-blue-600 hover:border-blue-600"
-                >
-                    Chat - Sending Request
-                </button>
-
-                <button 
-                    onclick="showNoResponseStep(true)"
-                    class="w-full rounded-lg border border-amber-500 bg-amber-500 px-6 py-4 text-lg font-bold text-white shadow-lg transition hover:bg-amber-600 hover:border-amber-600"
-                >
-                    No response from client
-                </button>
-
-                <button 
-                    onclick="showWorkflowStep(5)"
-                    class="w-full rounded-lg border border-gray-600 bg-gray-700 px-4 py-2 text-sm font-medium text-white transition hover:bg-gray-600"
-                >
-                    ← Back
-                </button>
-            </div>
-        </div>
-
-            <!-- Step 6: Invite troubleshooting -->
-            <div id="workflow-step-6" class="workflow-step hidden">
-                <p class="mb-4 text-center text-lg font-medium text-white">Trouble with invites</p>
-                
-                <div class="space-y-3">
-                    <button 
-                        onclick="copyWorkflowText('check-key-binding'); showWorkflowStep(7);"
-                        class="w-full rounded-lg border border-blue-600 bg-blue-600 px-6 py-4 text-lg font-bold text-white shadow-lg transition hover:bg-blue-700 hover:border-blue-700"
-                    >
-                        Chat - Check Key Binding
-                    </button>
-                    
-                    <button 
-                        onclick="showWorkflowStep(5)"
-                        class="w-full rounded-lg border border-gray-600 bg-gray-700 px-4 py-2 text-sm font-medium text-white transition hover:bg-gray-600"
-                    >
-                        ← Back
-                    </button>
-                </div>
-            </div>
-
-            <!-- Step 7: Bugged friend request follow-up -->
-            <div id="workflow-step-7" class="workflow-step hidden">
-                <p class="mb-4 text-center text-lg font-medium text-white">Still having trouble?</p>
-                
-                <div class="space-y-3">
-                    <button 
-                        onclick="showWorkflowStep(5)"
-                        class="w-full rounded-lg border border-green-600 bg-green-600 px-6 py-4 text-lg font-bold text-white shadow-lg transition hover:bg-green-700 hover:border-green-700"
-                    >
-                        No
-                    </button>
-                    
-                    <button 
-                        onclick="copyWorkflowText('bugged-friend-request')"
-                        class="w-full rounded-lg border border-red-600 bg-red-600 px-6 py-4 text-lg font-bold text-white shadow-lg transition hover:bg-red-700 hover:border-red-700"
-                    >
-                        Chat - Bugged
-                    </button>
-                </div>
-            </div>
-
-            <!-- Step 10: Party Invite -->
-            <div id="workflow-step-10" class="workflow-step hidden">
-                <p class="mb-4 text-center text-lg font-medium text-white">Party Invite</p>
-
-                <div class="space-y-3">
-                    <button 
-                        onclick="showWorkflowStep(8)"
-                        class="w-full rounded-lg border border-green-600 bg-green-600 px-6 py-4 text-lg font-bold text-white shadow-lg transition hover:bg-green-700 hover:border-green-700"
-                    >
-                        Invites confirmed
-                    </button>
-
-                    <button 
-                        onclick="showWorkflowStep(6)"
-                        class="w-full rounded-lg border border-amber-600 bg-amber-600 px-6 py-4 text-lg font-bold text-white shadow-lg transition hover:bg-amber-700 hover:border-amber-700"
-                    >
-                        Trouble with invites
-                    </button>
-
-                    <button 
-                        onclick="showWorkflowStep(9)"
-                        class="w-full rounded-lg border border-gray-600 bg-gray-700 px-4 py-2 text-sm font-medium text-white transition hover:bg-gray-600"
-                    >
-                        ← Back
-                    </button>
-                </div>
-            </div>
-
-            <!-- Step 8: Invites confirmed -->
-            <div id="workflow-step-8" class="workflow-step hidden">
-                <p class="mb-4 text-center text-lg font-medium text-white">Invites confirmed</p>
-                
-                <div class="space-y-3">
-                    <p class="text-center text-gray-300">Client is ready. Continue coordinating the alert.</p>
-                    
-                    <button 
-                        onclick="showWorkflowStep(5)"
-                        class="w-full rounded-lg border border-gray-600 bg-gray-700 px-4 py-2 text-sm font-medium text-white transition hover:bg-gray-600"
-                    >
-                        ← Back
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Workflow Minimized Bar -->
-    <div id="workflow-minimized" class="fixed bottom-4 left-4 z-50 hidden">
-        <div class="flex items-center gap-4 rounded-lg border border-gray-600 bg-mrs-box px-4 py-3 shadow-lg">
-            <div class="flex flex-col">
-                <span class="text-sm font-semibold uppercase tracking-wide text-white">Alert Workflow minimized</span>
-                <span id="workflow-minimized-step" class="text-xs text-gray-300">Current step: 1</span>
-            </div>
-            <div class="flex items-center gap-2">
-                <button onclick="restoreWorkflowModal()" class="rounded-lg border border-mrs-button bg-mrs-button px-3 py-2 text-xs font-semibold uppercase text-white transition hover:border-mrs-button-hover hover:bg-mrs-button-hover">
-                    Resume
-                </button>
-                <button onclick="closeWorkflowModal()" class="rounded-lg p-2 text-gray-400 transition hover:bg-gray-700 hover:text-white" title="Workflow schließen">
-                    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                    </svg>
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Copy Notification (Bottom Right) -->
-    <div id="copy-notification" class="fixed bottom-4 right-4 z-50 hidden rounded-lg bg-green-600 px-6 py-3 text-white shadow-lg">
-        <div class="flex items-center gap-2">
-            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-            </svg>
-            <span id="copy-notification-text">Copied to clipboard!</span>
-        </div>
-    </div>
-
-    <!-- Application JavaScript Modules -->
-    <script src="js/constants.js"></script>
-    <script src="js/ships-api.js"></script>
-    <script src="js/ship-assignment.js"></script>
-    <script src="js/aar.js"></script>
-    <script src="js/tip-splitter.js"></script>
-    <script src="js/home.js"></script>
-    <script src="js/team-management.js"></script>
-    <script src="js/workflow.js"></script>
-    <script src="js/ui.js"></script>
-    <script src="js/main.js"></script>
-</body>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ship Assignment Tool</title>
+    <link rel="icon" type="image/png" href="favicon.png">
+    <!-- Load Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Load Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Mohave:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Configure Tailwind to use custom fonts and colors -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        'sans': ['Inter', 'sans-serif'],
+                        'mohave': ['Mohave', 'sans-serif'],
+                    },
+                    colors: {
+                        // Custom colors from user request
+                        'mrs-bg': '#1f2937',
+                        'mrs-box': '#1d2735',
+                        'mrs-button': '#2b4e71',
+                        'mrs-button-hover': '#254666', // A slightly darker hover
+                        primary: tailwind.colors.blue,
+                    }
+                }
+            }
+        }
+    </script>
+
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body class="min-h-screen bg-mrs-bg p-0 font-sans text-gray-200">
+    
+    <!-- Header Bar -->
+    <div class="w-full bg-mrs-box border-b border-gray-700 p-4 shadow-lg">
+        <div class="mx-auto max-w-7xl">
+            <div class="flex items-center justify-between">
+                <h1 class="flex items-center gap-4 text-left font-mohave text-2xl font-semibold uppercase tracking-wide text-white">
+                    <img src="https://staff.medrunner.space/images/medrunner-logo-stable-white.svg" alt="Medrunner Logo" class="h-12 w-auto">
+                    <span>Medrunner Operations Tool</span>
+                </h1>
+                <div class="flex items-center gap-4">
+                    <button 
+                        onclick="openStandByModal()"
+                        class="rounded-lg border-2 border-[#5f9ea0] bg-[#5f9ea0] px-6 py-3 text-base font-bold text-white shadow-lg transition hover:bg-[#4f8e90] hover:border-[#4f8e90] active:bg-[#3f7e80] leading-tight"
+                    >
+                        Medrunner in<br>Stand By
+                    </button>
+                    <button 
+                        id="alarm-button-header"
+                        onclick="triggerAlarm()"
+                        class="rounded-lg border-2 border-red-600 bg-red-600 px-6 py-3 text-lg font-bold uppercase text-white shadow-lg transition hover:bg-red-700 hover:border-red-700 active:bg-red-800"
+                    >
+                        🚨 Alarm
+                    </button>
+                    <button 
+                        onclick="copyCurrentPositionStatus()"
+                        class="flex items-center gap-2 rounded-lg border border-gray-600 bg-gray-700 px-4 py-3 text-left text-white transition hover:bg-gray-600"
+                    >
+                        <span class="inline-flex items-center justify-center rounded-full bg-gray-800 p-1" title="Copy status">
+                            <svg class="h-4 w-4 text-gray-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                            </svg>
+                        </span>
+                        <div class="flex flex-col items-center leading-tight text-center">
+                            <span class="text-xs font-medium text-gray-300">Position</span>
+                            <span id="current-position-display" class="text-2xl font-bold">1</span>
+                        </div>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tab Navigation -->
+    <div class="w-full bg-mrs-box border-b border-gray-700">
+        <div class="mx-auto max-w-7xl px-4">
+            <div class="flex gap-2">
+                <button onclick="switchTab('home')" id="tab-home" class="tab-button active border-b-2 border-mrs-button px-6 py-3 font-mohave text-sm font-semibold uppercase tracking-wide text-white transition hover:bg-gray-700">
+                    Home
+                </button>
+                <button onclick="switchTab('shipAssignment')" id="tab-shipAssignment" class="tab-button border-b-2 border-transparent px-6 py-3 font-mohave text-sm font-semibold uppercase tracking-wide text-gray-400 transition hover:bg-gray-700 hover:text-white">
+                    Ship Assignment
+                </button>
+                <button onclick="switchTab('aar')" id="tab-aar" class="tab-button border-b-2 border-transparent px-6 py-3 font-mohave text-sm font-semibold uppercase tracking-wide text-gray-400 transition hover:bg-gray-700 hover:text-white">
+                    After Action Report
+                </button>
+                <button onclick="switchTab('tipSplitter')" id="tab-tipSplitter" class="tab-button border-b-2 border-transparent px-6 py-3 font-mohave text-sm font-semibold uppercase tracking-wide text-gray-400 transition hover:bg-gray-700 hover:text-white">
+                    Tip Splitter
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="mx-auto max-w-7xl p-4 md:p-8">
+
+        <!-- Alert Timer (global) -->
+        <div id="alert-timer-section" class="mb-6 rounded-lg border border-gray-700 bg-mrs-box p-4 shadow-lg hidden">
+            <div class="flex flex-col items-center gap-4 md:flex-row md:justify-between">
+                <div class="flex items-center gap-4">
+                    <div class="text-center">
+                        <div id="alert-timer-display" class="font-mono text-3xl font-bold text-white md:text-4xl">00:00:00</div>
+                        <div id="alert-timer-stage" class="text-sm font-medium text-gray-400">Ready</div>
+                        <div id="alert-channel-status" class="mt-1 text-xs text-gray-500">Channel status: Standby</div>
+                    </div>
+                </div>
+                <div class="flex flex-col items-center gap-2 md:flex-row md:gap-3">
+                    <!-- Channel Status Reminder -->
+                    <div id="timer-reminder" class="hidden rounded-lg bg-amber-600/90 px-3 py-2 text-sm font-medium text-white animate-pulse">
+                        <span id="timer-reminder-text">Remember to update channel status!</span>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <button id="alert-timer-button" onclick="advanceAlertTimer()" class="rounded-lg bg-green-600 px-6 py-3 text-base font-bold text-white transition hover:bg-green-700 border border-green-500 md:px-8 md:py-4 md:text-lg">
+                            Start Alert Timer
+                        </button>
+                        <button onclick="confirmResetAlertTimer()" class="rounded-lg bg-gray-700 px-4 py-3 text-sm font-medium text-gray-300 transition hover:bg-gray-600 border border-gray-600 md:py-4" title="Reset Timer">
+                            Reset
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- HOME TAB -->
+        <div id="content-home" class="tab-content">
+            <div class="mx-auto max-w-2xl rounded-lg border border-gray-700 bg-mrs-box p-5 shadow-lg md:p-6">
+                <h2 class="mb-6 text-center font-mohave text-2xl font-semibold uppercase tracking-wide text-white">Team Lead Setup</h2>
+                
+                <!-- Name of the Lead -->
+                <div class="mb-6">
+                    <div id="workflow-content" class="space-y-6">
+                        <div id="workflow-state-header" class="space-y-2">
+                            <h3 id="workflow-state-title" class="hidden text-center text-lg font-semibold uppercase tracking-wide text-white"></h3>
+                            <p id="workflow-state-text" class="hidden text-sm text-gray-300 text-center"></p>
+                        </div>
+                        <div id="workflow-input-container" class="hidden space-y-3"></div>
+                        <div id="workflow-transition-buttons" class="flex flex-col gap-3"></div>
+                    </div>
+                                        <div class="custom-select-option cursor-pointer px-3 py-2 text-sm text-gray-300 hover:bg-mrs-button hover:text-white border-t border-gray-600 mt-1 pt-2" data-value="Other">Other (specify below)</div>
+                                    </div>
+
+            <!-- Workflow Confirmation Modal -->
+                <div class="w-full max-w-md rounded-lg border border-gray-700 bg-mrs-box p-6 text-gray-200 shadow-xl">
+                    <p id="workflow-confirm-message" class="mb-6 text-center text-sm text-gray-200"></p>
+                    <div class="flex flex-col gap-3 sm:flex-row sm:justify-center">
+                        <button id="workflow-confirm-accept" class="rounded-lg border border-green-600 bg-green-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-green-700">
+                            Confirm
+                        </button>
+                        <button id="workflow-confirm-cancel" class="rounded-lg border border-gray-600 bg-gray-700 px-4 py-2 text-sm font-semibold text-gray-200 transition hover:bg-gray-600">
+                            Cancel
+                        </button>
+                    </div>
+                </div>
+            </div>
+                                </div>
+                            </div>
+                            <input type="text" id="aar-location-type-other" placeholder="Specify location type..." class="mt-2 w-full rounded-lg border border-gray-600 bg-gray-700 px-3 py-2 text-sm text-gray-200 transition focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 hidden">
+                        </div>
+
+                        <!-- Specific POI -->
+                        <div class="md:col-span-2">
+                            <label class="mb-2 block text-sm font-medium text-gray-300">Specific POI</label>
+                            <div class="custom-select-wrapper relative" id="aar-poi-select">
+                                <div class="custom-select-trigger relative flex w-full cursor-pointer items-center justify-between rounded-md border border-gray-600 bg-gray-700 px-3 py-2 text-sm text-gray-200 transition hover:border-primary-500">
+                                    <span class="custom-select-value truncate pr-4" id="aar-poi-value">Select POI...</span>
+                                    <svg class="custom-select-arrow absolute right-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400 transition-transform duration-200" viewBox="0 0 20 20" fill="currentColor">
+                                        <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/>
+                                    </svg>
+                                </div>
+                                <div class="custom-select-dropdown absolute left-0 right-0 top-full z-50 mt-1 hidden overflow-hidden rounded-md border border-gray-600 bg-gray-700 shadow-lg">
+                                    <div class="border-b border-gray-600 bg-gray-800 p-2">
+                                        <input type="text" placeholder="Search POIs..." class="poi-search-input w-full rounded-md border border-gray-600 bg-gray-900 px-3 py-1.5 text-sm text-gray-200 focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500">
+                                    </div>
+                                    <div class="custom-select-options custom-scrollbar max-h-60 overflow-y-auto" id="aar-poi-options">
+                                        <div class="px-3 py-2 text-sm text-gray-400">Select a planetary body first</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <input type="text" id="aar-poi-other" placeholder="Specify POI..." class="mt-2 w-full rounded-lg border border-gray-600 bg-gray-700 px-3 py-2 text-sm text-gray-200 transition focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 hidden">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TIMESTAMPS Section -->
+                <div class="mb-6">
+                    <h3 class="mb-3 font-mohave text-lg font-semibold uppercase tracking-wide text-blue-300">Timestamps (minutes)</h3>
+                    <div class="grid grid-cols-2 gap-4 md:grid-cols-4">
+                        <div>
+                            <label class="mb-2 block text-sm font-medium text-gray-300">Alert</label>
+                            <input type="text" id="aar-alert" value="00" class="w-full rounded-lg border border-gray-600 bg-gray-700 px-3 py-2 text-sm text-gray-200 transition focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500">
+                        </div>
+                        <div>
+                            <label class="mb-2 block text-sm font-medium text-gray-300">Depart</label>
+                            <input type="text" id="aar-depart" placeholder="5" class="w-full rounded-lg border border-gray-600 bg-gray-700 px-3 py-2 text-sm text-gray-200 transition focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500">
+                        </div>
+                        <div>
+                            <label class="mb-2 block text-sm font-medium text-gray-300">Client</label>
+                            <input type="text" id="aar-client" placeholder="15" class="w-full rounded-lg border border-gray-600 bg-gray-700 px-3 py-2 text-sm text-gray-200 transition focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500">
+                        </div>
+                        <div>
+                            <label class="mb-2 block text-sm font-medium text-gray-300">RTB</label>
+                            <input type="text" id="aar-rtb" placeholder="25" class="w-full rounded-lg border border-gray-600 bg-gray-700 px-3 py-2 text-sm text-gray-200 transition focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ENCOUNTERS Section -->
+                <div class="mb-6">
+                    <h3 class="mb-3 font-mohave text-lg font-semibold uppercase tracking-wide text-blue-300">Encounters</h3>
+                    <div class="grid gap-4 md:grid-cols-2">
+                        <div>
+                            <label class="mb-2 block text-sm font-medium text-gray-300">PVE</label>
+                            <input type="text" id="aar-pve" placeholder="e.g., NPCs (9Tails), Natural (Freezing Planet), None" class="w-full rounded-lg border border-gray-600 bg-gray-700 px-3 py-2 text-sm text-gray-200 transition focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500">
+                        </div>
+                        <div>
+                            <label class="mb-2 block text-sm font-medium text-gray-300">PVP</label>
+                            <input type="text" id="aar-pvp" placeholder="e.g., Hostiles, Neutrals, None" class="w-full rounded-lg border border-gray-600 bg-gray-700 px-3 py-2 text-sm text-gray-200 transition focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500">
+                        </div>
+                    </div>
+                    <div class="mt-4">
+                        <label class="mb-2 block text-sm font-medium text-gray-300">Actions Taken</label>
+                        <textarea id="aar-actions" rows="3" placeholder="Brief description of tactics and actions..." class="w-full rounded-lg border border-gray-600 bg-gray-700 px-3 py-2 text-sm text-gray-200 transition focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"></textarea>
+                    </div>
+                </div>
+
+                <!-- ISSUES Section -->
+                <div class="mb-6">
+                    <h3 class="mb-3 font-mohave text-lg font-semibold uppercase tracking-wide text-blue-300">Issues</h3>
+                    <div class="mb-4">
+                        <label class="mb-2 block text-sm font-medium text-gray-300">Problems</label>
+                        <div class="flex flex-wrap gap-2">
+                            <label class="flex items-center rounded-lg border border-gray-600 bg-gray-700 px-3 py-2 text-sm transition hover:bg-gray-600">
+                                <input type="checkbox" value="Login" class="aar-issue-checkbox mr-2 h-4 w-4 rounded border-gray-600 bg-gray-700 text-mrs-button focus:ring-2 focus:ring-mrs-button">
+                                Login
+                            </label>
+                            <label class="flex items-center rounded-lg border border-gray-600 bg-gray-700 px-3 py-2 text-sm transition hover:bg-gray-600">
+                                <input type="checkbox" value="Undocking" class="aar-issue-checkbox mr-2 h-4 w-4 rounded border-gray-600 bg-gray-700 text-mrs-button focus:ring-2 focus:ring-mrs-button">
+                                Undocking
+                            </label>
+                            <label class="flex items-center rounded-lg border border-gray-600 bg-gray-700 px-3 py-2 text-sm transition hover:bg-gray-600">
+                                <input type="checkbox" value="Quantum Travel/Jumpgate" class="aar-issue-checkbox mr-2 h-4 w-4 rounded border-gray-600 bg-gray-700 text-mrs-button focus:ring-2 focus:ring-mrs-button">
+                                Quantum Travel/Jumpgate
+                            </label>
+                            <label class="flex items-center rounded-lg border border-gray-600 bg-gray-700 px-3 py-2 text-sm transition hover:bg-gray-600">
+                                <input type="checkbox" value="30K" class="aar-issue-checkbox mr-2 h-4 w-4 rounded border-gray-600 bg-gray-700 text-mrs-button focus:ring-2 focus:ring-mrs-button">
+                                30K
+                            </label>
+                            <label class="flex items-center rounded-lg border border-gray-600 bg-gray-700 px-3 py-2 text-sm transition hover:bg-gray-600">
+                                <input type="checkbox" value="Desync" class="aar-issue-checkbox mr-2 h-4 w-4 rounded border-gray-600 bg-gray-700 text-mrs-button focus:ring-2 focus:ring-mrs-button">
+                                Desync
+                            </label>
+                            <label class="flex items-center rounded-lg border border-gray-600 bg-gray-700 px-3 py-2 text-sm transition hover:bg-gray-600">
+                                <input type="checkbox" value="Elevators" class="aar-issue-checkbox mr-2 h-4 w-4 rounded border-gray-600 bg-gray-700 text-mrs-button focus:ring-2 focus:ring-mrs-button">
+                                Elevators
+                            </label>
+                            <input type="text" id="aar-other-issues" placeholder="Other issues..." class="rounded-lg border border-gray-600 bg-gray-700 px-3 py-2 text-sm text-gray-200 transition focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="mb-2 block text-sm font-medium text-gray-300">Brief Fix</label>
+                        <textarea id="aar-fix" rows="2" placeholder="Describe how issues were resolved..." class="w-full rounded-lg border border-gray-600 bg-gray-700 px-3 py-2 text-sm text-gray-200 transition focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"></textarea>
+                    </div>
+                </div>
+
+                <!-- SUMMARY Section -->
+                <div class="mb-6">
+                    <h3 class="mb-3 font-mohave text-lg font-semibold uppercase tracking-wide text-blue-300">Summary</h3>
+                    <textarea id="aar-summary" rows="4" placeholder="Short alert description..." class="w-full rounded-lg border border-gray-600 bg-gray-700 px-3 py-2 text-sm text-gray-200 transition focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"></textarea>
+                </div>
+
+                <!-- RESULT Section -->
+                <div class="mb-6">
+                    <h3 class="mb-3 font-mohave text-lg font-semibold uppercase tracking-wide text-blue-300">Result</h3>
+                    <div class="mb-4">
+                        <label class="mb-2 block text-sm font-medium text-gray-300">Mission Outcome</label>
+                        <select id="aar-outcome" class="w-full rounded-lg border border-gray-600 bg-gray-700 px-3 py-2 text-sm text-gray-200 transition focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500">
+                            <option value="">Select...</option>
+                            <option value="Success">Success</option>
+                            <option value="Failed">Failed</option>
+                            <option value="Aborted">Aborted</option>
+                            <option value="No Contact">No Contact</option>
+                            <option value="Refused">Refused</option>
+                            <option value="Game Error">Game Error</option>
+                            <option value="Canceled">Canceled</option>
+                        </select>
+                    </div>
+                    <div class="grid gap-4 md:grid-cols-2">
+                        <div id="aar-extracted-container" class="hidden">
+                            <label class="mb-2 block text-sm font-medium text-gray-300">Client Extracted To</label>
+                            <div class="custom-select-wrapper relative" id="aar-extracted-select">
+                                <div class="custom-select-trigger relative flex w-full cursor-pointer items-center justify-between rounded-md border border-gray-600 bg-gray-700 px-3 py-2 text-sm text-gray-200 transition hover:border-primary-500">
+                                    <span class="custom-select-value truncate pr-4" id="aar-extracted-value">Select...</span>
+                                    <svg class="custom-select-arrow absolute right-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400 transition-transform duration-200" viewBox="0 0 20 20" fill="currentColor">
+                                        <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/>
+                                    </svg>
+                                </div>
+                                <div class="custom-select-dropdown absolute left-0 right-0 top-full z-50 mt-1 hidden overflow-hidden rounded-md border border-gray-600 bg-gray-700 shadow-lg">
+                                    <div class="border-b border-gray-600 bg-gray-800 p-2">
+                                        <input type="text" placeholder="Search stations..." class="extracted-search-input w-full rounded-md border border-gray-600 bg-gray-900 px-3 py-1.5 text-sm text-gray-200 focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500">
+                                    </div>
+                                    <div class="custom-select-options custom-scrollbar max-h-60 overflow-y-auto" id="aar-extracted-options">
+                                        <!-- Will be populated by JavaScript -->
+                                    </div>
+                                </div>
+                            </div>
+                            <input type="text" id="aar-extracted-other" placeholder="Specify location..." class="mt-2 w-full rounded-lg border border-gray-600 bg-gray-700 px-3 py-2 text-sm text-gray-200 transition focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 hidden">
+                        </div>
+                        <div>
+                            <label class="mb-2 block text-sm font-medium text-gray-300">Challenges</label>
+                            <select id="aar-challenges" class="w-full rounded-lg border border-gray-600 bg-gray-700 px-3 py-2 text-sm text-gray-200 transition focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500">
+                                <option value="">Select...</option>
+                                <option value="Abnormal Events">Abnormal Events (e.g., PvP, Hostage)</option>
+                                <option value="Routine">Routine (e.g., Standard Bunker Rescue)</option>
+                                <option value="Other">Other</option>
+                                <option value="None">None</option>
+                            </select>
+                            <input type="text" id="aar-challenges-other" placeholder="Specify challenges..." class="mt-2 w-full rounded-lg border border-gray-600 bg-gray-700 px-3 py-2 text-sm text-gray-200 transition focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 hidden">
+                        </div>
+                    </div>
+                    <div class="mt-4">
+                        <label class="mb-2 block text-sm font-medium text-gray-300">Failure/Abort Reason (if applicable)</label>
+                        <input type="text" id="aar-failure" placeholder="Describe reason for failure or abort..." class="w-full rounded-lg border border-gray-600 bg-gray-700 px-3 py-2 text-sm text-gray-200 transition focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500">
+                    </div>
+                </div>
+
+                <!-- NOTES Section -->
+                <div class="mb-6">
+                    <h3 class="mb-3 font-mohave text-lg font-semibold uppercase tracking-wide text-blue-300">Notes</h3>
+                    <textarea id="aar-notes" rows="4" placeholder="Any additional notes..." class="w-full rounded-lg border border-gray-600 bg-gray-700 px-3 py-2 text-sm text-gray-200 transition focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"></textarea>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="flex gap-3">
+                    <button onclick="generateAARPreview()" class="flex-1 rounded-lg border border-mrs-button bg-mrs-button px-6 py-3 font-semibold text-white shadow-md transition hover:border-mrs-button-hover hover:bg-mrs-button-hover">
+                        Generate Preview
+                    </button>
+                    <button onclick="clearAAR()" class="rounded-lg border border-gray-600 bg-gray-700 px-6 py-3 font-semibold text-white transition hover:bg-gray-600">
+                        Clear Form
+                    </button>
+                </div>
+            </div>
+
+            <!-- AAR Preview Card -->
+            <div class="rounded-lg border border-gray-700 bg-mrs-box p-5 shadow-lg md:p-6">
+                <h2 class="mb-4 font-mohave text-2xl font-semibold uppercase tracking-wide text-white">AAR Preview</h2>
+                <div id="aar-preview" class="max-h-96 min-h-[100px] overflow-y-auto rounded-lg border border-gray-700 bg-gray-900 p-4 font-mono text-sm text-gray-300 whitespace-pre-wrap md:p-6">Generate AAR to see preview...</div>
+                <button class="mt-5 w-full rounded-lg border border-mrs-button bg-mrs-button px-8 py-4 text-lg font-semibold text-white shadow-lg transition hover:border-mrs-button-hover hover:bg-mrs-button-hover" onclick="copyAARToClipboard()">COPY AAR TO CLIPBOARD</button>
+                <!-- Success Message -->
+                <div id="aar-successMessage" class="hidden">
+                    <div class="mt-3 rounded-lg bg-green-600 px-4 py-3 text-center font-medium text-white">
+                        ✅ Copied to clipboard!
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- END AAR TAB -->
+
+        <!-- TIP SPLITTER TAB -->
+        <div id="content-tipSplitter" class="tab-content hidden">
+            <div class="mb-6 rounded-lg border border-gray-700 bg-mrs-box p-5 shadow-lg md:p-6">
+                <h2 class="mb-4 font-mohave text-2xl font-semibold uppercase tracking-wide text-white">Tip Splitter Calculator</h2>
+                <p class="mb-4 rounded-lg border border-blue-900 bg-blue-950/50 p-3 text-sm text-gray-300">
+                    💡 <strong class="text-white">Calculate tip distributions</strong> accounting for the 0.5% transaction fee on each transfer. The calculator ensures the team lead doesn't lose money by including the fee in each transfer amount.
+                </p>
+
+                <!-- Input Section -->
+                <div class="mb-6">
+                    <h3 class="mb-3 font-mohave text-lg font-semibold uppercase tracking-wide text-blue-300">Tip Details</h3>
+                    <div class="grid gap-4 md:grid-cols-2">
+                        <div>
+                            <label class="mb-2 block text-sm font-medium text-gray-300">Total Tip Amount (aUEC)</label>
+                            <input type="number" id="tip-total" placeholder="100000" min="0" class="w-full rounded-lg border border-gray-600 bg-gray-700 px-3 py-2 text-sm text-gray-200 transition focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500">
+                        </div>
+                        <div>
+                            <label class="mb-2 block text-sm font-medium text-gray-300">
+                                Number of Crew Members
+                                <span class="text-xs font-normal text-gray-400">(excluding Team Lead)</span>
+                            </label>
+                            <input type="number" id="tip-recipients" placeholder="5" min="1" class="w-full rounded-lg border border-gray-600 bg-gray-700 px-3 py-2 text-sm text-gray-200 transition focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500">
+                            <p class="mt-1 text-xs text-gray-400">Enter the number of crew members who should receive tips (don't count yourself as Team Lead)</p>
+                        </div>
+                    </div>
+
+                    <!-- Lead Choice Option -->
+                    <div class="mt-4">
+                        <label class="mb-2 block text-sm font-medium text-gray-300">Your (Team Lead) Choice</label>
+                        <select id="tip-lead-choice" class="w-full rounded-lg border border-gray-600 bg-gray-700 px-3 py-2 text-sm text-gray-200 transition focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500">
+                            <option value="lead-keep">Keep Tip</option>
+                            <option value="lead-decline">Don't Want Tip (Redistribute)</option>
+                            <option value="lead-logistics">Donate to Logistics</option>
+                        </select>
+                        <p class="mt-1 text-xs text-gray-400">Choose what happens to your share. Keep = you get an equal share with no fee. Redistribute = your share goes to crew keeping tips. Logistics = your share goes to logistics pool.</p>
+                    </div>
+
+                    <!-- Option: Import from Ship Assignments -->
+                    <div class="mt-4">
+                        <button onclick="importCrewForTip()" class="rounded-lg border border-gray-600 bg-gray-700 px-4 py-2 text-sm font-medium text-white transition hover:bg-gray-600">
+                            Import Crew Count from Ship Assignments
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Recipient Management -->
+                <div class="mb-6">
+                    <h3 class="mb-3 font-mohave text-lg font-semibold uppercase tracking-wide text-blue-300">Crew Recipients</h3>
+                    <p class="mb-3 text-sm text-gray-400">
+                        Each crew member (excluding Team Lead) gets an equal share. Choose what happens to each share:
+                    </p>
+                    <div id="tip-recipients-list" class="mb-3 flex flex-col gap-2">
+                        <div class="px-3 py-2 text-sm text-gray-400">Add crew members by entering a number above or importing from ship assignments.</div>
+                    </div>
+                </div>
+
+                <!-- Calculate Button -->
+                <div class="mb-6">
+                    <button onclick="calculateTipSplit()" class="w-full rounded-lg border border-mrs-button bg-mrs-button px-8 py-4 text-lg font-semibold text-white shadow-lg transition hover:border-mrs-button-hover hover:bg-mrs-button-hover">
+                        CALCULATE SPLITS
+                    </button>
+                </div>
+
+                <!-- Results Section -->
+                <div id="tip-results" class="hidden">
+                    <h3 class="mb-3 font-mohave text-lg font-semibold uppercase tracking-wide text-blue-300">Transfer Amounts</h3>
+                    <p class="mb-3 text-xs text-gray-400">Type the "Amount to SEND" in-game. They'll receive that exact amount. Star Citizen adds 0.5% fee on top of what you send.</p>
+                    <div class="mb-4 rounded-lg border border-gray-700 bg-gray-900 p-4">
+                        <div class="mb-3 grid grid-cols-3 gap-4 border-b border-gray-700 pb-2 text-sm font-semibold text-blue-300">
+                            <div>Recipient</div>
+                            <div class="text-right">Amount to SEND</div>
+                            <div class="text-right">They RECEIVE</div>
+                        </div>
+                        <div id="tip-results-list" class="flex flex-col gap-2"></div>
+                        <div id="tip-logistics-transfer" class="hidden mt-3 pt-3 border-t border-yellow-600"></div>
+                    </div>
+
+                    <div class="rounded-lg border border-green-900 bg-green-950/50 p-4">
+                        <div class="grid gap-2 text-sm">
+                            <div class="flex justify-between">
+                                <span class="text-gray-300">Total Tip:</span>
+                                <span class="font-semibold text-white" id="tip-summary-total">0 aUEC</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-300">Total Crew Members:</span>
+                                <span class="font-semibold text-white" id="tip-summary-crew-count">0</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-300">Share Per Crew Member:</span>
+                                <span class="font-semibold text-white" id="tip-summary-share">0 aUEC</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-300">Total Fees (0.5% per transfer):</span>
+                                <span class="font-semibold text-red-300" id="tip-summary-fees">0 aUEC</span>
+                            </div>
+                            <div id="tip-summary-logistics-section" class="hidden flex justify-between border-t border-yellow-800 pt-2">
+                                <span class="text-yellow-300">Logistics Pool:</span>
+                                <span class="text-lg font-bold text-yellow-300" id="tip-summary-logistics">0 aUEC</span>
+                            </div>
+                            <div class="flex justify-between border-t border-green-800 pt-2">
+                                <span class="text-gray-300">You Will Transfer:</span>
+                                <span class="text-lg font-bold text-white" id="tip-summary-transfer">0 aUEC</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-300">You Keep:</span>
+                                <span class="text-lg font-bold text-green-300" id="tip-summary-keep">0 aUEC</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- END TIP SPLITTER TAB -->
+    </div>
+
+    <!-- Lead Name Warning Modal -->
+    <div id="lead-name-warning-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/70 p-4">
+        <div class="w-full max-w-sm rounded-lg border border-amber-500 bg-mrs-box p-6 shadow-xl">
+            <div class="flex flex-col items-center gap-4 text-center">
+                <div class="text-lg font-semibold uppercase tracking-wide text-white">Lead Name Required</div>
+                <p class="text-sm text-gray-300">Please enter the lead name before saving or triggering the alert.</p>
+                <button onclick="hideLeadNameWarningModal()" class="rounded-lg border border-amber-500 bg-amber-500 px-5 py-2 text-sm font-semibold uppercase text-white transition hover:bg-amber-600">
+                    Got it
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Import from Discord Modal -->
+    <div id="import-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/70 p-4">
+        <div class="w-full max-w-2xl rounded-lg border border-gray-700 bg-mrs-box p-6 shadow-xl">
+            <div class="mb-4 flex items-center justify-between">
+                <h2 class="font-mohave text-2xl font-semibold uppercase tracking-wide text-white">Import from Discord</h2>
+                <button onclick="closeImportModal()" class="rounded-lg p-2 text-gray-400 transition hover:bg-gray-700 hover:text-white">
+                    <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+            <p class="mb-4 rounded-lg border border-blue-900 bg-blue-950/50 p-3 text-sm text-gray-300">
+                💡 <strong class="text-white">Paste a Discord ship assignment message</strong> below to automatically populate the ship assignments. This is useful for team lead hand-overs.
+            </p>
+            <textarea id="import-discord-message" rows="10" placeholder="Paste your Discord ship assignment message here..." class="w-full rounded-lg border border-gray-600 bg-gray-700 px-3 py-2 text-sm text-gray-200 font-mono transition focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"></textarea>
+            <div id="import-status" class="mt-3 hidden rounded-lg px-4 py-3 text-center font-medium"></div>
+            <div class="mt-4 flex gap-3">
+                <button onclick="importFromDiscord()" class="flex-1 rounded-lg border border-mrs-button bg-mrs-button px-5 py-2.5 text-sm font-medium text-white shadow-md transition hover:border-mrs-button-hover hover:bg-mrs-button-hover">Import & Populate</button>
+                <button onclick="closeImportModal()" class="rounded-lg border border-gray-600 bg-gray-700 px-5 py-2.5 text-sm font-medium text-white transition hover:bg-gray-600">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Medrunner Stand By Modal -->
+    <div id="standby-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/70 p-4">
+        <div class="w-full max-w-3xl max-h-[90vh] overflow-y-auto rounded-lg border border-gray-700 bg-mrs-box p-6 shadow-xl">
+            <div class="mb-4 flex items-center justify-between">
+                <h2 class="font-mohave text-2xl font-semibold uppercase tracking-wide text-white">Medrunner Stand By</h2>
+                <button onclick="closeStandByModal()" class="rounded-lg p-2 text-gray-400 transition hover:bg-gray-700 hover:text-white">
+                    <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+
+            <!-- Checklist (for single team) -->
+            <div id="standby-checklist-single" class="mb-6">
+                <h3 class="mb-3 font-mohave text-lg font-semibold uppercase tracking-wide text-blue-300">Checklist</h3>
+                <ul class="space-y-2 text-gray-300">
+                    <li class="flex items-start gap-2">
+                        <span class="text-blue-400">•</span>
+                        <span>Less than 9 People in the current Team</span>
+                    </li>
+                    <li class="flex items-start gap-2">
+                        <span class="text-blue-400">•</span>
+                        <span>At the designated muster point.</span>
+                    </li>
+                    <li class="flex items-start gap-2">
+                        <span class="text-blue-400">•</span>
+                        <span>Necessary gear for duty.</span>
+                    </li>
+                    <li class="flex items-start gap-2">
+                        <span class="text-blue-400">•</span>
+                        <span>Respawn point is set to the current muster point?</span>
+                    </li>
+                    <li class="flex items-start gap-2">
+                        <span class="text-blue-400">•</span>
+                        <span>"Can you load into the game and confirm you're having no issues?"</span>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- Add Medrunner Form -->
+            <div class="mb-6 rounded-lg border border-gray-600 bg-gray-800/50 p-4">
+                <h3 class="mb-3 font-mohave text-lg font-semibold uppercase tracking-wide text-white">Add Team Member</h3>
+                <div class="mb-3">
+                    <label for="medrunner-name-input" class="mb-2 block text-sm font-medium text-gray-300">Medrunner Name</label>
+                    <input 
+                        type="text" 
+                        id="medrunner-name-input" 
+                        placeholder="Enter medrunner name..."
+                        class="w-full rounded-lg border border-gray-600 bg-gray-700 px-4 py-3 text-gray-200 transition focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
+                    >
+                </div>
+                <div id="team-warning" class="mb-3 hidden rounded-lg bg-amber-600/90 px-4 py-3 text-center font-medium text-white">
+                    ⚠️ Caution: You should split the team!
+                </div>
+                <button 
+                    onclick="addTeamMember()"
+                    class="w-full rounded-lg border border-green-600 bg-green-600 px-6 py-3 text-base font-bold text-white shadow-lg transition hover:bg-green-700 hover:border-green-700 active:bg-green-800"
+                >
+                    💾 Add to Team
+                </button>
+            </div>
+
+            <!-- Current Team Members List -->
+            <div class="mb-4">
+                <div class="mb-3 flex items-center justify-between">
+                    <h3 class="font-mohave text-lg font-semibold uppercase tracking-wide text-white">Current Team Members</h3>
+                    <button 
+                        onclick="sortTeamMembers()"
+                        class="rounded-lg border border-gray-600 bg-gray-700 px-4 py-2 text-sm font-medium text-white transition hover:bg-gray-600"
+                    >
+                        🔄 Reload/Sort
+                    </button>
+                </div>
+                <div id="team-members-list" class="space-y-2">
+                    <p class="text-sm text-gray-400 italic">No team members added yet.</p>
+                </div>
+            </div>
+
+            <!-- Close Button -->
+            <div class="mt-6">
+                <button 
+                    onclick="closeStandByModal()"
+                    class="w-full rounded-lg border border-gray-600 bg-gray-700 px-6 py-3 text-base font-medium text-white transition hover:bg-gray-600"
+                >
+                    Close
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Workflow Modal -->
+    <div id="workflow-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/70 p-4">
+        <div class="w-full max-w-2xl rounded-lg border border-gray-700 bg-mrs-box p-6 shadow-xl">
+            <div class="mb-4 flex items-center justify-between">
+                <div class="flex-1">
+                    <h2 class="font-mohave text-2xl font-semibold uppercase tracking-wide text-white">Alert Workflow</h2>
+                </div>
+                <div class="flex items-center gap-2">
+                    <button onclick="minimizeWorkflowModal()" class="rounded-lg border border-gray-600 px-3 py-2 text-sm font-medium text-gray-300 transition hover:bg-gray-700 hover:text-white">
+                        Minimize
+                    </button>
+                    <button onclick="closeWorkflowModal()" class="rounded-lg p-2 text-gray-400 transition hover:bg-gray-700 hover:text-white" title="Workflow schließen">
+                        <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+
+            <div id="workflow-content" class="space-y-6">
+                <div id="workflow-state-header" class="space-y-2">
+                    <div id="workflow-state-number" class="hidden text-center text-sm font-semibold uppercase tracking-wide text-gray-400"></div>
+                    <h3 id="workflow-state-title" class="hidden text-center text-lg font-semibold uppercase tracking-wide text-white"></h3>
+                    <p id="workflow-state-text" class="hidden text-sm text-gray-300 text-center"></p>
+                </div>
+                <div id="workflow-input-container" class="hidden space-y-3"></div>
+                <div id="workflow-transition-buttons" class="flex flex-col gap-3"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Workflow Confirmation Modal -->
+        <div class="w-full max-w-md rounded-lg border border-gray-700 bg-mrs-box p-6 text-gray-200 shadow-xl">
+            <p id="workflow-confirm-message" class="mb-6 text-center text-sm text-gray-200"></p>
+            <div class="flex flex-col gap-3 sm:flex-row sm:justify-center">
+                <button id="workflow-confirm-accept" class="rounded-lg border border-green-600 bg-green-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-green-700">
+                    Confirm
+                </button>
+                <button id="workflow-confirm-cancel" class="rounded-lg border border-gray-600 bg-gray-700 px-4 py-2 text-sm font-semibold text-gray-200 transition hover:bg-gray-600">
+                    Cancel
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Skip to minimized bar marker -->
+    <div id="workflow-minimized" class="fixed bottom-4 left-4 z-50 hidden">
+        <div class="flex items-center gap-4 rounded-lg border border-gray-600 bg-mrs-box px-4 py-3 shadow-lg">
+
+        <div class="flex items-center gap-4 rounded-lg border border-gray-600 bg-mrs-box px-4 py-3 shadow-lg">
+            <div class="flex flex-col">
+                <span class="text-sm font-semibold uppercase tracking-wide text-white">Alert Workflow minimized</span>
+                <span id="workflow-minimized-step" class="text-xs text-gray-300">Current step: 1</span>
+            </div>
+            <div class="flex items-center gap-2">
+                <button onclick="restoreWorkflowModal()" class="rounded-lg border border-mrs-button bg-mrs-button px-3 py-2 text-xs font-semibold uppercase text-white transition hover:border-mrs-button-hover hover:bg-mrs-button-hover">
+                    Resume
+                </button>
+                <button onclick="closeWorkflowModal()" class="rounded-lg p-2 text-gray-400 transition hover:bg-gray-700 hover:text-white" title="Workflow schließen">
+                    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Copy Notification (Bottom Right) -->
+    <div id="copy-notification" class="fixed bottom-4 right-4 z-50 hidden rounded-lg bg-green-600 px-6 py-3 text-white shadow-lg">
+        <div class="flex items-center gap-2">
+            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+            </svg>
+            <span id="copy-notification-text">Copied to clipboard!</span>
+        </div>
+    </div>
+
+    <!-- Application JavaScript Modules -->
+    <script src="js/constants.js"></script>
+    <script src="js/ships-api.js"></script>
+    <script src="js/ship-assignment.js"></script>
+    <script src="js/aar.js"></script>
+    <script src="js/tip-splitter.js"></script>
+    <script src="js/home.js"></script>
+    <script src="js/team-management.js"></script>
+    <script src="js/workflow.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/main.js"></script>
+</body>
 </html>
