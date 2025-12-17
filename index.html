@@ -841,7 +841,8 @@
 
             <!-- Step 1 -->
             <div id="workflow-step-1" class="workflow-step">
-                <p class="mb-4 text-center text-lg font-medium text-white">Step 1</p>
+                <p class="mb-2 text-center text-lg font-medium text-white">Step 1</p>
+                <p class="mb-4 text-center text-sm font-medium text-gray-400">Channel – Set Status Alarm</p>
                 <div class="space-y-3">
                     <button 
                         onclick="copyWorkflowText('channel-set-status-alarm'); showWorkflowStep(2);"
@@ -852,7 +853,7 @@
                 </div>
                 <button 
                     onclick="goWorkflowBack()"
-                    class="w-full rounded-lg border border-gray-600 bg-gray-700 px-4 py-2 text-sm font-medium text-white transition hover:bg-gray-600"
+                    class="w-full rounded-lg border border-gray-600 bg-gray-700 px-4 py-2 text-sm font-medium text-white transition hover:bg-gray-600 mt-4"
                 >
                     ← Back
                 </button>
@@ -860,7 +861,8 @@
 
             <!-- Step 2 -->
             <div id="workflow-step-2" class="workflow-step hidden">
-                <p class="mb-4 text-center text-lg font-medium text-white">Is there a Dispatcher?</p>
+                <p class="mb-2 text-center text-lg font-medium text-white">Step 2</p>
+                <p class="mb-4 text-center text-sm font-medium text-gray-400">Is there a Dispatcher?</p>
                 <div class="space-y-3">
                     <button 
                         onclick="showWorkflowStep(3);"
@@ -886,7 +888,8 @@
 
             <!-- Step 3 -->
             <div id="workflow-step-3" class="workflow-step hidden">
-                <p class="mb-4 text-center text-lg font-medium text-white">Check if Questions were Submited</p>
+                <p class="mb-2 text-center text-lg font-medium text-white">Step 3</p>
+                <p class="mb-4 text-center text-sm font-medium text-gray-400">Check if Questions were Submited</p>
                 <div class="space-y-3">
                     <button 
                         onclick="showWorkflowStep(6);"
