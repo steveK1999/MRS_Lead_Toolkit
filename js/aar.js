@@ -189,6 +189,45 @@ function confirmResetAlertTimer() {
 }
 
 /**
+ * Set the alert timer to a specific stage based on button label.
+ * @param {string} targetLabel - The target stage button text (e.g., "Left Station").
+ */
+function setAlertTimerStage(targetLabel) {
+    if (!targetLabel) {
+        return;
+    }
+
+    const normalized = targetLabel.toLowerCase();
+    const targetIndex = TIMER_STAGES.findIndex(stage => stage.buttonText.toLowerCase() === normalized);
+
+    if (targetIndex === -1) {
+        console.warn("Unknown alert timer stage:", targetLabel);
+        return;
+    }
+
+    if (targetIndex === 0) {
+        resetAlertTimer(true);
+        return;
+    }
+
+    if (timerStageIndex === 0) {
+        advanceAlertTimer();
+    }
+
+    while (timerStageIndex < targetIndex) {
+        advanceAlertTimer();
+    }
+
+    if (timerStageIndex > targetIndex) {
+        resetAlertTimer(true);
+        advanceAlertTimer();
+        while (timerStageIndex < targetIndex) {
+            advanceAlertTimer();
+        }
+    }
+}
+
+/**
  * Updates the timer button text based on current stage.
  *
  * @function updateTimerButton
