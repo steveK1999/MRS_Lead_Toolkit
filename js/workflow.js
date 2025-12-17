@@ -174,12 +174,20 @@ function copyWorkflowText(action) {
     const timestamp = Math.floor(Date.now() / 1000);
     
     switch (action) {
+        case 'channel-set-status-alarm':
+            textToCopy = `<:AA1:1182246601557823520><:AA2:1182246604401561610><:AA3:1182246605718556682><:AA4:1182246607228514304><:AA5:1182246610189692938><:AA6:1182246613150859304><:AA7:1182246614665019393><:AA8:1182246617559072838><t:${timestamp}:R>`;
+            break;
+            
         case 'set-channel-status':
             textToCopy = `<a:AlertBlue:1064652389711360043><a:AlertRed:985293780288700476><:AA1:1182246601557823520><:AA2:1182246604401561610><:AA3:1182246605718556682><:AA4:1182246607228514304><:AA5:1182246610189692938><:AA6:1182246613150859304><:AA7:1182246614665019393><:AA8:1182246617559072838><a:AlertRed:985293780288700476><a:AlertBlue:1064652389711360043><t:${timestamp}:R>`;
             break;
             
         case 'no-questionform':
             textToCopy = 'Hello! Once the questions have been answered we can proceed.';
+            break;
+        
+        case 'chat-please-submit-questions':
+            textToCopy = 'Hello. Could you please complete the questionnaire and press submit.';
             break;
             
         case 'without-dispatch':
