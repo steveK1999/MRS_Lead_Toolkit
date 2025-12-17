@@ -826,7 +826,7 @@ Please confirm here once you have accepted it.`,
                         },
                         {
                             type: "modal",
-                            value: "Are you sure you wanna end the Mission? Please send the End and Feedback text first to the Client before you confirm"
+                            value: "Are you sure you wanna end the Mission? Please sent the End and Feedback text first to the Client before you confirm"
                         },
                         {
                             type: "alert_status",
@@ -987,16 +987,10 @@ function renderWorkflowState(stateId) {
     workflowState.currentStateId = stateId;
     updateWorkflowMinimizedStepLabel(stateId);
 
-    const stateNumberEl = document.getElementById("workflow-state-number");
     const titleEl = document.getElementById("workflow-state-title");
     const textEl = document.getElementById("workflow-state-text");
     const inputContainer = document.getElementById("workflow-input-container");
     const transitionsContainer = document.getElementById("workflow-transition-buttons");
-
-    if (stateNumberEl) {
-        stateNumberEl.textContent = `Page ${stateId}`;
-        stateNumberEl.classList.remove("hidden");
-    }
 
     if (titleEl) {
         if (state.title) {
