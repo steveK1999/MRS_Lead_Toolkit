@@ -237,9 +237,6 @@ function triggerAlarm() {
             advanceAlertTimer();
         }
         
-        // Copy Discord alert to clipboard
-        copyDiscordAlert();
-        
         // Open workflow modal
         openWorkflowModal();
     }
