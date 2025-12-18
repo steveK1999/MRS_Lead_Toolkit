@@ -77,6 +77,11 @@ function showWorkflowStep(stepNumber) {
         step.classList.remove('hidden');
         workflowState.currentStep = stepNumber;
         updateWorkflowMinimizedStepLabel(stepNumber);
+        
+        // Load saved data for specific steps
+        if (stepNumber === 17) {
+            loadNearestStation();
+        }
     }
 }
 
@@ -262,6 +267,38 @@ function handleArriveAtClient() {
 }
 
 /**
+ * Save the nearest station name to localStorage
+ */
+function saveNearestStation() {
+    const input = document.getElementById('workflow-nearest-station');
+    if (input && input.value.trim()) {
+        localStorage.setItem('mrs_workflow_nearest_station', input.value.trim());
+    }
+}
+
+/**
+ * Load the nearest station name from localStorage
+ */
+function loadNearestStation() {
+    const input = document.getElementById('workflow-nearest-station');
+    const savedStation = localStorage.getItem('mrs_workflow_nearest_station');
+    if (input && savedStation) {
+        input.value = savedStation;
+    }
+}
+
+/**
+ * Handle extraction to nearest station: copy message and navigate to Step 18
+ */
+function handleExtractionToStation() {
+    copyWorkflowText('chat-extraction-nearest-station');
+    
+    setTimeout(() => {
+        showWorkflowStep(18);
+    }, 100);
+}
+
+/**
  * Copy workflow text to clipboard
  * @param {string} action - The action identifier
  */
@@ -337,6 +374,10 @@ function copyWorkflowText(action) {
         
         case 'chat-closing-in':
             textToCopy = 'Our Team is close to you location. We will arrive soon.';
+            break;
+        
+        case 'chat-extraction-nearest-station':
+            textToCopy = 'We will bring you safely to nearest Station. Please stay close to our team and do not go anywhere else, because it may pose a risk to your safety. The Team will bring you in the ship and will show you where to sit or lay down during the flight. Please do not leave this place during the flight or open your Mobiglass unless the team tells you to do so.\nWe will let you know when we arrive.';
             break;
         
         case 'chat-no-response-warning':

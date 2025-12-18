@@ -1242,25 +1242,71 @@
 
             <!-- Step 16 -->
             <div id="workflow-step-16" class="workflow-step hidden">
-                <p class="mb-4 text-center text-lg font-medium text-white">Step 16</p>
-                <div class="space-y-3 min-h-[100px]"></div>
+                <p class="mb-2 text-center text-lg font-medium text-white">Step 16</p>
+                <p class="mb-4 text-center text-sm font-medium text-gray-400">Extraction Decision</p>
+                <div class="space-y-3">
+                    <button
+                        onclick="showWorkflowStep(17)"
+                        class="w-full rounded-lg border border-gray-600 bg-blue-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-blue-700"
+                    >
+                        Extraction Needed
+                    </button>
+                    <button
+                        onclick="showWorkflowStep(19)"
+                        class="w-full rounded-lg border border-gray-600 bg-green-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-green-700"
+                    >
+                        No extraction needed and Client safe → End of Mission
+                    </button>
+                    <button
+                        onclick="handleMissionFailure()"
+                        class="w-full rounded-lg border border-gray-600 bg-red-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-red-700"
+                    >
+                        Chat – Failure with Feedback
+                    </button>
+                </div>
                 <button 
                     onclick="goWorkflowBack()"
-                    class="w-full rounded-lg border border-gray-600 bg-gray-700 px-4 py-2 text-sm font-medium text-white transition hover:bg-gray-600"
+                    class="w-full rounded-lg border border-gray-600 bg-gray-700 px-4 py-2 text-sm font-medium text-white transition hover:bg-gray-600 mt-3"
                 >
-                    ← Zurück
+                    ← Back
                 </button>
             </div>
 
             <!-- Step 17 -->
             <div id="workflow-step-17" class="workflow-step hidden">
-                <p class="mb-4 text-center text-lg font-medium text-white">Step 17</p>
-                <div class="space-y-3 min-h-[100px]"></div>
+                <p class="mb-2 text-center text-lg font-medium text-white">Step 17</p>
+                <p class="mb-4 text-center text-sm font-medium text-gray-400">Extraction Planning</p>
+                <div class="space-y-3">
+                    <div>
+                        <label for="workflow-nearest-station" class="block text-sm font-medium text-gray-300 mb-2">
+                            Nearest Station
+                        </label>
+                        <input
+                            type="text"
+                            id="workflow-nearest-station"
+                            placeholder="Please fill in the Name of the nearest Station"
+                            class="w-full rounded-lg border border-gray-600 bg-gray-700 px-4 py-2 text-sm text-white placeholder-gray-400 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                            onchange="saveNearestStation()"
+                        />
+                    </div>
+                    <button
+                        onclick="handleExtractionToStation()"
+                        class="w-full rounded-lg border border-gray-600 bg-blue-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-blue-700"
+                    >
+                        Chat – Extraction to nearest Station
+                    </button>
+                    <button
+                        onclick="handleMissionFailure()"
+                        class="w-full rounded-lg border border-gray-600 bg-red-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-red-700"
+                    >
+                        Chat – Failure with Feedback
+                    </button>
+                </div>
                 <button 
                     onclick="goWorkflowBack()"
-                    class="w-full rounded-lg border border-gray-600 bg-gray-700 px-4 py-2 text-sm font-medium text-white transition hover:bg-gray-600"
+                    class="w-full rounded-lg border border-gray-600 bg-gray-700 px-4 py-2 text-sm font-medium text-white transition hover:bg-gray-600 mt-3"
                 >
-                    ← Zurück
+                    ← Back
                 </button>
             </div>
 
