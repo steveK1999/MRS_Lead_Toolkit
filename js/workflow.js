@@ -166,6 +166,21 @@ function handleStandDownAction() {
 }
 
 /**
+ * Handle stand down with confirmation: show confirm dialog, then copy, reset timer and close modal
+ */
+function handleStandDownWithConfirm() {
+    if (confirm('Are you sure you want to stand down from this alert?')) {
+        copyWorkflowText('chat-stand-down');
+        
+        if (typeof resetAlertTimer === 'function') {
+            resetAlertTimer(true);
+        }
+        
+        closeWorkflowModal();
+    }
+}
+
+/**
  * Copy workflow text to clipboard
  * @param {string} action - The action identifier
  */
@@ -188,6 +203,10 @@ function copyWorkflowText(action) {
         
         case 'chat-please-submit-questions':
             textToCopy = 'Hello. Could you please complete the questionnaire and press submit.';
+            break;
+        
+        case 'chat-no-response-5min':
+            textToCopy = 'If we do not hear from you within 5 minutes, we will assume all is well and close this alert.';
             break;
             
         case 'without-dispatch':
