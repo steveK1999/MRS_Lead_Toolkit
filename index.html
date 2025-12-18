@@ -1190,25 +1190,53 @@
 
             <!-- Step 14 -->
             <div id="workflow-step-14" class="workflow-step hidden">
-                <p class="mb-4 text-center text-lg font-medium text-white">Step 14</p>
-                <div class="space-y-3 min-h-[100px]"></div>
+                <p class="mb-2 text-center text-lg font-medium text-white">Step 14</p>
+                <p class="mb-4 text-center text-sm font-medium text-gray-400">En Route Update</p>
+                <div class="space-y-3">
+                    <button
+                        onclick="copyWorkflowText('chat-closing-in'); setTimeout(() => showWorkflowStep(15), 100);"
+                        class="w-full rounded-lg border border-gray-600 bg-blue-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-blue-700"
+                    >
+                        Chat – Closing in
+                    </button>
+                    <button
+                        onclick="handleMissionFailure()"
+                        class="w-full rounded-lg border border-gray-600 bg-red-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-red-700"
+                    >
+                        Chat – Failure with Feedback
+                    </button>
+                </div>
                 <button 
                     onclick="goWorkflowBack()"
-                    class="w-full rounded-lg border border-gray-600 bg-gray-700 px-4 py-2 text-sm font-medium text-white transition hover:bg-gray-600"
+                    class="w-full rounded-lg border border-gray-600 bg-gray-700 px-4 py-2 text-sm font-medium text-white transition hover:bg-gray-600 mt-3"
                 >
-                    ← Zurück
+                    ← Back
                 </button>
             </div>
 
             <!-- Step 15 -->
             <div id="workflow-step-15" class="workflow-step hidden">
-                <p class="mb-4 text-center text-lg font-medium text-white">Step 15</p>
-                <div class="space-y-3 min-h-[100px]"></div>
+                <p class="mb-2 text-center text-lg font-medium text-white">Step 15</p>
+                <p class="mb-4 text-center text-sm font-medium text-gray-400">Arrival</p>
+                <div class="space-y-3">
+                    <button
+                        onclick="handleArriveAtClient()"
+                        class="w-full rounded-lg border border-gray-600 bg-green-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-green-700"
+                    >
+                        Arrive at the Client
+                    </button>
+                    <button
+                        onclick="handleMissionFailure()"
+                        class="w-full rounded-lg border border-gray-600 bg-red-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-red-700"
+                    >
+                        Chat – Failure with Feedback
+                    </button>
+                </div>
                 <button 
                     onclick="goWorkflowBack()"
-                    class="w-full rounded-lg border border-gray-600 bg-gray-700 px-4 py-2 text-sm font-medium text-white transition hover:bg-gray-600"
+                    class="w-full rounded-lg border border-gray-600 bg-gray-700 px-4 py-2 text-sm font-medium text-white transition hover:bg-gray-600 mt-3"
                 >
-                    ← Zurück
+                    ← Back
                 </button>
             </div>
 

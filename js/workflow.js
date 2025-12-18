@@ -248,6 +248,20 @@ function handleMissionFailure() {
 }
 
 /**
+ * Handle arrive at client: advance timer to "Arrived at Client", navigate to Step 16
+ */
+function handleArriveAtClient() {
+    // Advance alert timer to "Arrived at Client" stage
+    if (typeof advanceAlertTimer === 'function') {
+        advanceAlertTimer();
+    }
+    
+    setTimeout(() => {
+        showWorkflowStep(16);
+    }, 100);
+}
+
+/**
  * Copy workflow text to clipboard
  * @param {string} action - The action identifier
  */
@@ -319,6 +333,10 @@ function copyWorkflowText(action) {
         
         case 'chat-failure-feedback':
             textToCopy = 'As we conclude our service, we\'d like to sincerely thank you for trusting us. We\'re sorry that we were unable to rescue you this time. Your health and satisfaction are our top priorities, and we hope that we will be able to assist you in the future if needed. If you have a moment, we\'d greatly appreciate it if you could leave a rating and comment on the alert card to let us know how we handled your case today!';
+            break;
+        
+        case 'chat-closing-in':
+            textToCopy = 'Our Team is close to you location. We will arrive soon.';
             break;
         
         case 'chat-no-response-warning':
