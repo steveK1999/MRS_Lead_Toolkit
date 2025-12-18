@@ -238,9 +238,24 @@ function updateCrewNameDatalist() {
     }
     
     // Combine and deduplicate
-    const allNames = [...new Set([...teamMemberNames, ...cachedNames])];
+    let allNames = [...new Set([...teamMemberNames, ...cachedNames])];
     
-    datalist.innerHTML = allNames.map(name => `<option value="${name}">`).join("");
+    // Filter out names that are already assigned to ships
+    const assignedNames = new Set();
+    ships.forEach(ship => {
+        ship.crew.forEach(crew => {
+            if (crew.name && crew.name.trim()) {
+                assignedNames.add(crew.name.trim().toLowerCase());
+            }
+        });
+    });
+    
+    // Only show names that are not yet assigned
+    const availableNames = allNames.filter(name => 
+        !assignedNames.has(name.toLowerCase())
+    );
+    
+    datalist.innerHTML = availableNames.map(name => `<option value="${name}">`).join("");
 }
 
 /**
@@ -627,6 +642,7 @@ function addCrewMember(shipId) {
         renderShips();
         updatePreview();
         saveShipAssignments();
+        updateCrewNameDatalist(); // Update available names
     }
 }
 
@@ -669,6 +685,7 @@ function removeCrewMember(shipId, crewId) {
         renderShips();
         updatePreview();
         saveShipAssignments();
+        updateCrewNameDatalist(); // Update available names
     }
 }
 
@@ -758,6 +775,7 @@ function updateCrewName(shipId, crewId, name) {
                 renderShips();
                 updatePreview();
                 saveShipAssignments();
+                updateCrewNameDatalist(); // Update available names
                 return;
             }
             
@@ -785,6 +803,7 @@ function updateCrewName(shipId, crewId, name) {
             }
             
             saveShipAssignments();
+            updateCrewNameDatalist(); // Update available names
             // Name doesn't affect preview, so no need to updatePreview()
         }
     }
