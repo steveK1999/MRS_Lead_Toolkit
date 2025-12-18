@@ -198,6 +198,23 @@ function handleServiceDenial() {
 }
 
 /**
+ * Handle stand down from Step 8: copy message, show confirm dialog, then reset timer and close modal
+ */
+function handleStandDownFromStep8() {
+    if (confirm('Are you sure you want to stand down from this alert?')) {
+        copyWorkflowText('chat-stand-down');
+        
+        if (typeof resetAlertTimer === 'function') {
+            resetAlertTimer(true);
+        }
+        
+        setTimeout(() => {
+            closeWorkflowModal();
+        }, 100);
+    }
+}
+
+/**
  * Copy workflow text to clipboard
  * @param {string} action - The action identifier
  */
@@ -237,6 +254,26 @@ function copyWorkflowText(action) {
         case 'chat-greetings':
             const leadName = getLeadName() || 'Zeek';
             textToCopy = `Thank you for choosing Medrunner Services! My name is ${leadName}, and I'll be leading the team dispatched to your location. I will be sending you a friend request and/or party invite. (To accept the invite, make sure you're in first-person view and spam the key to the right of P — typically the [ key, though it may vary depending on your keyboard layout.) Please confirm here when you are ready to receive the invites!\n\nCould you please tell me if you need a Med Bed and if you need Extraction to the NEAREST Station.\nPlease let me know anytime during this operation if anything changes (for example your medical condition or dangers)`;
+            break;
+        
+        case 'chat-friend-request':
+            textToCopy = 'Friend Request sent, please spam the accept key!';
+            break;
+        
+        case 'chat-party-invite':
+            textToCopy = 'Party Invite sent, please spam the accept key!';
+            break;
+        
+        case 'chat-check-key-binding':
+            textToCopy = 'Hmm it was not accepted, is your default accept key the key on the right of P?';
+            break;
+        
+        case 'chat-bugged-spectrum':
+            textToCopy = 'The Friend Request has bugged, this is a known problem. Please can you navigate to https://robertsspaceindustries.com/spectrum to accept the Friend Request.\n\nPlease confirm here once you have accepted it.';
+            break;
+        
+        case 'chat-no-response-warning':
+            textToCopy = 'Just as fair warning, if we haven\'t heard from you within the next 5 minutes, we will hope all is well and close this alert.';
             break;
             
         case 'without-dispatch':

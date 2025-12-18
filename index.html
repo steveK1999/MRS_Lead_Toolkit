@@ -1003,61 +1003,136 @@
 
             <!-- Step 7 -->
             <div id="workflow-step-7" class="workflow-step hidden">
-                <p class="mb-4 text-center text-lg font-medium text-white">Step 7</p>
-                <div class="space-y-3 min-h-[100px]"></div>
+                <p class="mb-2 text-center text-lg font-medium text-white">Step 7</p>
+                <p class="mb-4 text-center text-sm font-medium text-gray-400">Friend Request Status</p>
+                <div class="space-y-3">
+                    <button 
+                        onclick="copyWorkflowText('chat-friend-request'); setTimeout(() => showWorkflowStep(9), 100);"
+                        class="w-full rounded-lg border border-green-600 bg-green-600 px-6 py-4 text-lg font-bold text-white shadow-lg transition hover:bg-green-700 hover:border-green-700"
+                    >
+                        💬 Chat - Friend Request
+                    </button>
+                    
+                    <button 
+                        onclick="copyWorkflowText('chat-no-response-warning'); setTimeout(() => showWorkflowStep(8), 100);"
+                        class="w-full rounded-lg border border-blue-600 bg-blue-600 px-6 py-4 text-lg font-bold text-white shadow-lg transition hover:bg-blue-700 hover:border-blue-700"
+                    >
+                        💬 Chat – No Response
+                    </button>
+                </div>
                 <button 
                     onclick="goWorkflowBack()"
-                    class="w-full rounded-lg border border-gray-600 bg-gray-700 px-4 py-2 text-sm font-medium text-white transition hover:bg-gray-600"
+                    class="w-full rounded-lg border border-gray-600 bg-gray-700 px-4 py-2 text-sm font-medium text-white transition hover:bg-gray-600 mt-3"
                 >
-                    ← Zurück
+                    ← Back
                 </button>
             </div>
 
             <!-- Step 8 -->
             <div id="workflow-step-8" class="workflow-step hidden">
-                <p class="mb-4 text-center text-lg font-medium text-white">Step 8</p>
-                <div class="space-y-3 min-h-[100px]"></div>
+                <p class="mb-2 text-center text-lg font-medium text-white">Step 8</p>
+                <p class="mb-4 text-center text-sm font-medium text-gray-400">Client Check</p>
+                <div class="space-y-3">
+                    <button 
+                        onclick="showWorkflowStep(9);"
+                        class="w-full rounded-lg border border-green-600 bg-green-600 px-6 py-4 text-lg font-bold text-white shadow-lg transition hover:bg-green-700 hover:border-green-700"
+                    >
+                        Client Response
+                    </button>
+                    
+                    <button 
+                        onclick="handleStandDownFromStep8();"
+                        class="w-full rounded-lg border border-red-700 bg-red-700 px-6 py-4 text-lg font-bold text-white shadow-lg transition hover:bg-red-800 hover:border-red-800"
+                    >
+                        💬 Chat – Stand Down
+                    </button>
+                </div>
                 <button 
                     onclick="goWorkflowBack()"
-                    class="w-full rounded-lg border border-gray-600 bg-gray-700 px-4 py-2 text-sm font-medium text-white transition hover:bg-gray-600"
+                    class="w-full rounded-lg border border-gray-600 bg-gray-700 px-4 py-2 text-sm font-medium text-white transition hover:bg-gray-600 mt-3"
                 >
-                    ← Zurück
+                    ← Back
                 </button>
             </div>
 
             <!-- Step 9 -->
             <div id="workflow-step-9" class="workflow-step hidden">
-                <p class="mb-4 text-center text-lg font-medium text-white">Step 9</p>
-                <div class="space-y-3 min-h-[100px]"></div>
+                <p class="mb-2 text-center text-lg font-medium text-white">Step 9</p>
+                <p class="mb-4 text-center text-sm font-medium text-gray-400">Party Invite</p>
+                <div class="space-y-3">
+                    <button 
+                        onclick="copyWorkflowText('chat-party-invite'); setTimeout(() => showWorkflowStep(12), 100);"
+                        class="w-full rounded-lg border border-green-600 bg-green-600 px-6 py-4 text-lg font-bold text-white shadow-lg transition hover:bg-green-700 hover:border-green-700"
+                    >
+                        💬 Chat – Party Invite
+                    </button>
+                    
+                    <button 
+                        onclick="showWorkflowStep(10);"
+                        class="w-full rounded-lg border border-orange-600 bg-orange-600 px-6 py-4 text-lg font-bold text-white shadow-lg transition hover:bg-orange-700 hover:border-orange-700"
+                    >
+                        Issue with Invite
+                    </button>
+                </div>
                 <button 
                     onclick="goWorkflowBack()"
-                    class="w-full rounded-lg border border-gray-600 bg-gray-700 px-4 py-2 text-sm font-medium text-white transition hover:bg-gray-600"
+                    class="w-full rounded-lg border border-gray-600 bg-gray-700 px-4 py-2 text-sm font-medium text-white transition hover:bg-gray-600 mt-3"
                 >
-                    ← Zurück
+                    ← Back
                 </button>
             </div>
 
             <!-- Step 10 -->
             <div id="workflow-step-10" class="workflow-step hidden">
-                <p class="mb-4 text-center text-lg font-medium text-white">Step 10</p>
-                <div class="space-y-3 min-h-[100px]"></div>
+                <p class="mb-2 text-center text-lg font-medium text-white">Step 10</p>
+                <p class="mb-4 text-center text-sm font-medium text-gray-400">Invite Troubleshooting</p>
+                <div class="space-y-3">
+                    <button 
+                        onclick="copyWorkflowText('chat-check-key-binding'); setTimeout(() => showWorkflowStep(11), 100);"
+                        class="w-full rounded-lg border border-blue-600 bg-blue-600 px-6 py-4 text-lg font-bold text-white shadow-lg transition hover:bg-blue-700 hover:border-blue-700"
+                    >
+                        💬 Chat – Check Key Binding
+                    </button>
+                    
+                    <button 
+                        onclick="copyWorkflowText('chat-no-response-warning'); setTimeout(() => showWorkflowStep(8), 100);"
+                        class="w-full rounded-lg border border-orange-600 bg-orange-600 px-6 py-4 text-lg font-bold text-white shadow-lg transition hover:bg-orange-700 hover:border-orange-700"
+                    >
+                        💬 Chat – No Response
+                    </button>
+                </div>
                 <button 
                     onclick="goWorkflowBack()"
-                    class="w-full rounded-lg border border-gray-600 bg-gray-700 px-4 py-2 text-sm font-medium text-white transition hover:bg-gray-600"
+                    class="w-full rounded-lg border border-gray-600 bg-gray-700 px-4 py-2 text-sm font-medium text-white transition hover:bg-gray-600 mt-3"
                 >
-                    ← Zurück
+                    ← Back
                 </button>
             </div>
 
             <!-- Step 11 -->
             <div id="workflow-step-11" class="workflow-step hidden">
-                <p class="mb-4 text-center text-lg font-medium text-white">Step 11</p>
-                <div class="space-y-3 min-h-[100px]"></div>
+                <p class="mb-2 text-center text-lg font-medium text-white">Step 11</p>
+                <p class="mb-4 text-center text-sm font-medium text-gray-400">Party Invite Confirmation</p>
+                <div class="space-y-3">
+                    <button 
+                        onclick="copyWorkflowText('chat-party-invite'); setTimeout(() => showWorkflowStep(12), 100);"
+                        class="w-full rounded-lg border border-green-600 bg-green-600 px-6 py-4 text-lg font-bold text-white shadow-lg transition hover:bg-green-700 hover:border-green-700"
+                    >
+                        💬 Chat – Party Invite
+                    </button>
+                    
+                    <button 
+                        onclick="copyWorkflowText('chat-bugged-spectrum');"
+                        class="w-full rounded-lg border border-red-600 bg-red-600 px-6 py-4 text-lg font-bold text-white shadow-lg transition hover:bg-red-700 hover:border-red-700"
+                    >
+                        💬 Chat – Bugged Spectrum needed
+                    </button>
+                </div>
                 <button 
                     onclick="goWorkflowBack()"
-                    class="w-full rounded-lg border border-gray-600 bg-gray-700 px-4 py-2 text-sm font-medium text-white transition hover:bg-gray-600"
+                    class="w-full rounded-lg border border-gray-600 bg-gray-700 px-4 py-2 text-sm font-medium text-white transition hover:bg-gray-600 mt-3"
                 >
-                    ← Zurück
+                    ← Back
                 </button>
             </div>
 
