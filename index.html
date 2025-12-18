@@ -969,13 +969,35 @@
 
             <!-- Step 6 -->
             <div id="workflow-step-6" class="workflow-step hidden">
-                <p class="mb-4 text-center text-lg font-medium text-white">Step 6</p>
-                <div class="space-y-3 min-h-[100px]"></div>
+                <p class="mb-2 text-center text-lg font-medium text-white">Step 6</p>
+                <p class="mb-4 text-center text-sm font-medium text-gray-400">Response Options</p>
+                <div class="space-y-3">
+                    <button 
+                        onclick="copyWorkflowText('chat-no-team-available');"
+                        class="w-full rounded-lg border border-blue-600 bg-blue-600 px-6 py-4 text-lg font-bold text-white shadow-lg transition hover:bg-blue-700 hover:border-blue-700"
+                    >
+                        💬 Chat - No Team available
+                    </button>
+                    
+                    <button 
+                        onclick="handleServiceDenial();"
+                        class="w-full rounded-lg border border-red-600 bg-red-600 px-6 py-4 text-lg font-bold text-white shadow-lg transition hover:bg-red-700 hover:border-red-700"
+                    >
+                        💬 Chat – Service Denial
+                    </button>
+                    
+                    <button 
+                        onclick="copyWorkflowText('chat-greetings'); setTimeout(() => showWorkflowStep(7), 100);"
+                        class="w-full rounded-lg border border-green-600 bg-green-600 px-6 py-4 text-lg font-bold text-white shadow-lg transition hover:bg-green-700 hover:border-green-700"
+                    >
+                        💬 Chat - Greetings
+                    </button>
+                </div>
                 <button 
                     onclick="goWorkflowBack()"
-                    class="w-full rounded-lg border border-gray-600 bg-gray-700 px-4 py-2 text-sm font-medium text-white transition hover:bg-gray-600"
+                    class="w-full rounded-lg border border-gray-600 bg-gray-700 px-4 py-2 text-sm font-medium text-white transition hover:bg-gray-600 mt-3"
                 >
-                    ← Zurück
+                    ← Back
                 </button>
             </div>
 

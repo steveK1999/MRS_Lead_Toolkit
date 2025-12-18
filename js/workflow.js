@@ -181,6 +181,23 @@ function handleStandDownWithConfirm() {
 }
 
 /**
+ * Handle service denial: copy message, show confirm dialog, then close modal and reset timer
+ */
+function handleServiceDenial() {
+    if (confirm('Are you sure you want to send a service denial?')) {
+        copyWorkflowText('service-denial');
+        
+        if (typeof resetAlertTimer === 'function') {
+            resetAlertTimer(true);
+        }
+        
+        setTimeout(() => {
+            closeWorkflowModal();
+        }, 100);
+    }
+}
+
+/**
  * Copy workflow text to clipboard
  * @param {string} action - The action identifier
  */
@@ -207,6 +224,19 @@ function copyWorkflowText(action) {
         
         case 'chat-no-response-5min':
             textToCopy = 'If we do not hear from you within 5 minutes, we will assume all is well and close this alert.';
+            break;
+        
+        case 'chat-no-team-available':
+            textToCopy = "Thank you for choosing Medrunner Services! We've received your alert — no need to worry. All active teams are currently deployed, but one will be assigned to you shortly.!";
+            break;
+        
+        case 'service-denial':
+            textToCopy = `Greetings. We regret to inform you that we are currently unable to respond to your emergency for one or more of the following reasons:\n• All MEDRUNNER personnel are currently occupied or unavailable.\n• Ongoing technical difficulties affect personnel or game functionality.\n• Active teams are engaged in priority-level operations and cannot be diverted.\n• Your current location falls outside our operational parameters.\nWe understand this may be frustrating and sincerely apologize for any inconvenience. We encourage you to reach out again in the future, and we will make every effort to assist you as soon as possible.`;
+            break;
+        
+        case 'chat-greetings':
+            const leadName = getLeadName() || 'Zeek';
+            textToCopy = `Thank you for choosing Medrunner Services! My name is ${leadName}, and I'll be leading the team dispatched to your location. I will be sending you a friend request and/or party invite. (To accept the invite, make sure you're in first-person view and spam the key to the right of P — typically the [ key, though it may vary depending on your keyboard layout.) Please confirm here when you are ready to receive the invites!\n\nCould you please tell me if you need a Med Bed and if you need Extraction to the NEAREST Station.\nPlease let me know anytime during this operation if anything changes (for example your medical condition or dangers)`;
             break;
             
         case 'without-dispatch':
